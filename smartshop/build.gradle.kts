@@ -16,10 +16,11 @@
  */
 plugins {
     id("org.springframework.boot") version "3.2.3" apply false
-    id("io.spring.dependency-management") version "1.1.4" apply false
+    id("io.spring.dependency-management") version "1.1.4"
     id("java")
 }
 
+val springBootVersion: String by project
 val springCloudVersion: String by project
 val javaVersion: String by project
 val mapstructVersion: String by project
@@ -53,6 +54,7 @@ subprojects {
 
     dependencyManagement {
         imports {
+            mavenBom("org.springframework.boot:spring-boot-dependencies:$springBootVersion")
             mavenBom("org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion")
         }
     }

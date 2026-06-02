@@ -1,0 +1,9 @@
+# Gradle caches and build outputs
+.gradle/
+build/
+**/build/
+
+# IDE metadata
+.idea/
+*.iml
+out/

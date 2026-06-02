@@ -29,6 +29,17 @@ public abstract class BaseEvent {
     private final Instant timestamp;
 
     /**
+     * Default constructor for serialization frameworks.
+     *
+     * @param none no parameters required
+     */
+    protected BaseEvent() {
+        this.eventId = UUID.randomUUID().toString();
+        this.eventType = "UNKNOWN";
+        this.timestamp = Instant.now();
+    }
+
+    /**
      * Creates a base event with auto-generated ID and current timestamp.
      *
      * @param eventType semantic event type name

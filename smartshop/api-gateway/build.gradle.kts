@@ -13,4 +13,7 @@ dependencies {
     implementation("io.micrometer:micrometer-tracing-bridge-brave:${project.property("micrometerTracingVersion")}")
     implementation("io.zipkin.reporter2:zipkin-reporter-brave:${project.property("zipkinReporterVersion")}")
     implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:${project.property("springdocVersion")}")
+    implementation("io.jsonwebtoken:jjwt-api:${project.property("jjwtVersion")}")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:${project.property("jjwtVersion")}")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:${project.property("jjwtVersion")}")
 }
