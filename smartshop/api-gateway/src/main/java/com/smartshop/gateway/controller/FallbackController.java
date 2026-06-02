@@ -43,8 +43,7 @@ public class FallbackController {
      */
     @GetMapping("/{service}")
     public Mono<ResponseEntity<ApiResponse<Void>>> fallback(@PathVariable String service) {
-        ApiResponse<Void> body = ApiResponse.of(
-                null,
+        ApiResponse<Void> body = ApiResponse.failure(
                 service + " is temporarily unavailable. Please retry shortly.");
         return Mono.just(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(body));
     }
