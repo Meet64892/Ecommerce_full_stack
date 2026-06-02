@@ -1,0 +1,24 @@
+# =============================================================================
+# user-service application-prod.yml — PROD profile overrides
+# =============================================================================
+# Activated with --spring.profiles.active=prod. Tightens settings for
+# production: no SQL echo, less chatty logs, and a hard requirement that the
+# JWT secret comes from the environment (never the dev default).
+# =============================================================================
+
+spring:
+  jpa:
+    show-sql: false
+  config:
+    # In prod we DROP "optional:" so the service fails fast if it cannot reach
+    # the config-server — better to refuse startup than run with stale defaults.
+    import: "configserver:http://config-server:8888"
+
+jwt:
+  # No default here on purpose: the env var MUST be provided in prod.
+  secret: ${JWT_SECRET}
+
+logging:
+  level:
+    com.smartshop: INFO
+    org.springframework.security: WARN

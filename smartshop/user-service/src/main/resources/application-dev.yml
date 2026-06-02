@@ -1,0 +1,18 @@
+# =============================================================================
+# user-service application-dev.yml — DEV profile overrides
+# =============================================================================
+# Spring profiles let one artifact behave differently per environment. Activate
+# with: --spring.profiles.active=dev (or SPRING_PROFILES_ACTIVE=dev). Values here
+# OVERRIDE the base application.yml when the dev profile is active.
+# =============================================================================
+
+spring:
+  jpa:
+    # Echo SQL to the console in dev to learn/inspect generated queries.
+    show-sql: true
+
+logging:
+  level:
+    # Verbose logging while developing.
+    com.smartshop: DEBUG
+    org.springframework.security: DEBUG

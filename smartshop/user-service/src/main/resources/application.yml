@@ -1,0 +1,72 @@
+# =============================================================================
+# user-service application.yml — base config (shared across profiles)
+# =============================================================================
+
+server:
+  # Service port; gateway routes /api/users/** here.
+  port: 8081
+
+spring:
+  application:
+    name: user-service
+  # Pull shared + service-specific config (jwt.*) from the config-server.
+  # optional: => start even if config-server is briefly down (dev convenience).
+  config:
+    import: "optional:configserver:http://localhost:8888"
+  datasource:
+    # JDBC coordinates for the PostgreSQL database owned by this service.
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/smartshop_users}
+    username: ${DB_USER:smartshop}
+    password: ${DB_PASSWORD:smartshop}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      # validate => Hibernate checks the schema matches entities but never
+      # changes it. Schema changes are owned by Flyway, not Hibernate, so prod
+      # never gets surprise DDL.
+      ddl-auto: validate
+    properties:
+      hibernate:
+        # Log readable SQL during dev troubleshooting.
+        format_sql: true
+    open-in-view: false  # Avoid the OSIV anti-pattern (lazy loads in the view).
+  flyway:
+    # Run versioned migrations on startup to bring the schema to the latest V*.
+    enabled: true
+    locations: classpath:db/migration
+
+# JWT settings have safe local defaults but are normally served by config-server
+# (see config-repo/user-service.yml). Declared here so the service also runs
+# standalone without the config-server.
+jwt:
+  secret: ${JWT_SECRET:smartshop-dev-secret-key-change-me-in-production-please-32bytes}
+  expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URI:http://localhost:9411/api/v2/spans}
+
+logging:
+  pattern:
+    # traceId/spanId via MDC so logs correlate across services in Zipkin.
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
