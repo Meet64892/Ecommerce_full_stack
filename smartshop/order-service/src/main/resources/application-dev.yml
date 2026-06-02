@@ -1,0 +1,10 @@
+# =============================================================================
+# order-service application-dev.yml — DEV overrides
+# =============================================================================
+spring:
+  jpa:
+    show-sql: true
+logging:
+  level:
+    com.smartshop: DEBUG
+    org.springframework.kafka: INFO
