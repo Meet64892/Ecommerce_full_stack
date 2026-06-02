@@ -1,0 +1,8 @@
+plugins {
+    `java-library`
+}
+
+dependencies {
+    api("com.fasterxml.jackson.core:jackson-databind")
+    api("jakarta.validation:jakarta.validation-api")
+}

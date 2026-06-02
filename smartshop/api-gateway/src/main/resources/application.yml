@@ -1,0 +1,104 @@
+server:
+  # Gateway ingress port for clients.
+  port: 8080
+
+spring:
+  application:
+    # Service name used in Eureka and tracing metadata.
+    name: api-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          # Enables routes by serviceId discovered from Eureka.
+          enabled: true
+      default-filters:
+        # Deduplicate CORS headers that might be added by multiple layers.
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+      routes:
+        # User service route including circuit breaker and rate limiter.
+        - id: user-service-route
+          uri: lb://user-service
+          predicates:
+            - Path=/auth/**,/users/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: userServiceCircuitBreaker
+                fallbackUri: forward:/fallback
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+                key-resolver: "#{@userKeyResolver}"
+        # Product service route.
+        - id: product-service-route
+          uri: lb://product-service
+          predicates:
+            - Path=/products/**,/categories/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: productServiceCircuitBreaker
+                fallbackUri: forward:/fallback
+        # Order service route.
+        - id: order-service-route
+          uri: lb://order-service
+          predicates:
+            - Path=/orders/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: orderServiceCircuitBreaker
+                fallbackUri: forward:/fallback
+        # Inventory service route.
+        - id: inventory-service-route
+          uri: lb://inventory-service
+          predicates:
+            - Path=/inventory/**
+        # Notification service route.
+        - id: notification-service-route
+          uri: lb://notification-service
+          predicates:
+            - Path=/notifications/**
+
+  data:
+    redis:
+      # Redis hosts rate limiter token buckets and request counters.
+      host: localhost
+      port: 6379
+
+  config:
+    import:
+      # Allows startup when config server is not yet available.
+      - optional:configserver:http://localhost:8888
+
+eureka:
+  client:
+    service-url:
+      # Registry endpoint used for dynamic service location.
+      defaultZone: http://localhost:8761/eureka/
+
+management:
+  tracing:
+    sampling:
+      # Sample all traces in development for teaching purposes.
+      probability: 1.0
+  zipkin:
+    tracing:
+      # Zipkin collector endpoint.
+      endpoint: http://localhost:9411/api/v2/spans
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+security:
+  jwt:
+    # Demo key for HS256 signing; production should use vault-managed secret.
+    secret: smartshop-demo-jwt-secret-key-that-is-at-least-thirty-two-bytes
+
+logging:
+  pattern:
+    # Adds trace/span IDs to each log line for distributed tracing correlation.
+    level: "%5p [traceId=%X{traceId:-},spanId=%X{spanId:-},corr=%X{correlationId:-}]"

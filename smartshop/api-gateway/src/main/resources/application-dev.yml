@@ -1,0 +1,6 @@
+spring:
+  cloud:
+    gateway:
+      httpclient:
+        # Development timeout is short to demonstrate fallback behavior quickly.
+        connect-timeout: 2000

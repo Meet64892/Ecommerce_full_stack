@@ -1,0 +1,55 @@
+server:
+  # Notification service HTTP port.
+  port: 8085
+
+spring:
+  application:
+    # Service ID for registry and tracing metadata.
+    name: notification-service
+  config:
+    import:
+      # Optional config server import prevents local startup lockout.
+      - optional:configserver:http://localhost:8888
+  kafka:
+    # Kafka broker endpoint for event consumption.
+    bootstrap-servers: localhost:9092
+    consumer:
+      # Notification consumer group receives each message stream once per partition.
+      group-id: notification-service-group
+      auto-offset-reset: earliest
+  mail:
+    # SMTP host for local testing; replace in production.
+    host: localhost
+    # SMTP port for local testing.
+    port: 1025
+    properties:
+      mail:
+        smtp:
+          # Disable auth for local dev mail servers.
+          auth: false
+          # Disable TLS for local demo.
+          starttls:
+            enable: false
+
+eureka:
+  client:
+    service-url:
+      # Discovery endpoint.
+      defaultZone: http://localhost:8761/eureka/
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+logging:
+  pattern:
+    # Include trace/span IDs for async event traceability.
+    level: "%5p [traceId=%X{traceId:-},spanId=%X{spanId:-}]"

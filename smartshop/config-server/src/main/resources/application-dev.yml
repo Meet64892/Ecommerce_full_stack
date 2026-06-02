@@ -1,0 +1,6 @@
+# Development profile favors fail-safe startup to avoid local lockouts.
+spring:
+  cloud:
+    config:
+      server:
+        bootstrap: true

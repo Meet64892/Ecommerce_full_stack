@@ -1,0 +1,28 @@
+# The server section controls embedded web server behavior.
+server:
+  # Eureka dashboard and server APIs run on this port.
+  port: 8761
+
+spring:
+  application:
+    # Logical app name shown in logs and telemetry.
+    name: service-registry
+
+eureka:
+  client:
+    # The server should not register itself as a client instance.
+    register-with-eureka: false
+    # The server should not fetch registry data from itself.
+    fetch-registry: false
+  server:
+    # Interval to purge expired leases; stale instances are evicted here.
+    eviction-interval-timer-in-ms: 10000
+    # Self-preservation protects against mass eviction during network partitions.
+    enable-self-preservation: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # Expose all actuator endpoints for local diagnostics.
+        include: "*"

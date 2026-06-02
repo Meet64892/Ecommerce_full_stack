@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Order Update</title>
+</head>
+<body>
+<h2>Order Update</h2>
+<p>Your order <strong th:text="${orderId}">ORDER_ID</strong> has been processed.</p>
+<p th:if="${reason != null}">Reason: <span th:text="${reason}">reason</span></p>
+<p>Thank you for shopping with SmartShop.</p>
+</body>
+</html>

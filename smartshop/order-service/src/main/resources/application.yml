@@ -1,0 +1,72 @@
+server:
+  # Order service HTTP port.
+  port: 8083
+
+spring:
+  application:
+    # Eureka service ID.
+    name: order-service
+  config:
+    import:
+      # Optional import allows startup if config server is down (fail-safe mode).
+      - optional:configserver:http://localhost:8888
+  datasource:
+    # Order database connection URL.
+    url: jdbc:postgresql://localhost:5432/smartshop_orders
+    username: smartshop
+    password: smartshop
+  jpa:
+    hibernate:
+      # Validate mappings against Flyway-managed schema.
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    # Enables schema migration on startup.
+    enabled: true
+    baseline-on-migrate: true
+  kafka:
+    # Kafka broker used for saga events.
+    bootstrap-servers: localhost:9092
+    consumer:
+      # Consumer group identifier for order-service listeners.
+      group-id: order-service-group
+      # On empty offsets, start from earliest for local reproducibility.
+      auto-offset-reset: earliest
+
+resilience4j:
+  retry:
+    instances:
+      orderExternalRetry:
+        # Max attempts for transient integration failures.
+        max-attempts: 3
+        # Wait duration between retries.
+        wait-duration: 500ms
+        # Exponential backoff multiplier improves recovery under load.
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+
+eureka:
+  client:
+    service-url:
+      # Registry endpoint for dynamic service discovery.
+      defaultZone: http://localhost:8761/eureka/
+
+management:
+  tracing:
+    sampling:
+      # Full sampling for educational tracing.
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+logging:
+  pattern:
+    # Include trace IDs to visualize cross-service call paths.
+    level: "%5p [traceId=%X{traceId:-},spanId=%X{spanId:-}]"

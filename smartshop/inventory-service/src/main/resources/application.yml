@@ -1,0 +1,68 @@
+server:
+  # Inventory service HTTP port.
+  port: 8084
+
+spring:
+  application:
+    # Eureka discovery name.
+    name: inventory-service
+  config:
+    import:
+      # Optional config server import for local resilience.
+      - optional:configserver:http://localhost:8888
+  datasource:
+    # PostgreSQL URL for inventory data.
+    url: jdbc:postgresql://localhost:5432/smartshop_inventory
+    username: smartshop
+    password: smartshop
+  jpa:
+    hibernate:
+      # Flyway controls schema lifecycle.
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    # Enables migration scripts on startup.
+    enabled: true
+    baseline-on-migrate: true
+  data:
+    redis:
+      # Redis host for cache entries.
+      host: localhost
+      # Redis port.
+      port: 6379
+  kafka:
+    # Kafka broker endpoint.
+    bootstrap-servers: localhost:9092
+    consumer:
+      # Consumer group receives all order.created events for inventory processing.
+      group-id: inventory-service-group
+      auto-offset-reset: earliest
+
+management:
+  endpoint:
+    health:
+      # Show component details to demonstrate custom Redis health indicator.
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+
+eureka:
+  client:
+    service-url:
+      # Eureka registry endpoint.
+      defaultZone: http://localhost:8761/eureka/
+
+logging:
+  pattern:
+    # Trace IDs in logs help follow async order->inventory flow.
+    level: "%5p [traceId=%X{traceId:-},spanId=%X{spanId:-}]"

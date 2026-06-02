@@ -1,0 +1,5 @@
+# Production profile generally pairs with fail-fast clients for strict config correctness.
+management:
+  endpoint:
+    health:
+      show-details: never

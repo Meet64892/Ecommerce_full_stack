@@ -1,0 +1,6 @@
+spring:
+  cloud:
+    gateway:
+      httpclient:
+        # Production timeout balances user latency with resilience.
+        connect-timeout: 5000

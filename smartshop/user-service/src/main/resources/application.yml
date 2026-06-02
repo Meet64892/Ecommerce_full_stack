@@ -1,0 +1,67 @@
+server:
+  # User service HTTP port.
+  port: 8081
+
+spring:
+  application:
+    # Service ID registered in Eureka.
+    name: user-service
+  config:
+    import:
+      # Optional import avoids startup failure if config server is unavailable.
+      - optional:configserver:http://localhost:8888
+  datasource:
+    # PostgreSQL JDBC URL for user bounded context.
+    url: jdbc:postgresql://localhost:5432/smartshop_users
+    # DB username for local development.
+    username: smartshop
+    # DB password for local development.
+    password: smartshop
+  jpa:
+    hibernate:
+      # Flyway manages schema, so ddl-auto is validate only.
+      ddl-auto: validate
+    properties:
+      hibernate:
+        # SQL dialect ensures correct PostgreSQL syntax generation.
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    # Enables schema migration at startup.
+    enabled: true
+    # Schema history table ensures ordered, repeatable migrations.
+    baseline-on-migrate: true
+  kafka:
+    # Kafka broker endpoint for user.registered event publishing.
+    bootstrap-servers: localhost:9092
+
+security:
+  jwt:
+    # HS256 demo key (minimum length for HMAC safety).
+    secret: smartshop-demo-jwt-secret-key-that-is-at-least-thirty-two-bytes
+    # Short-lived tokens reduce risk window if leaked.
+    expiration-seconds: 3600
+
+eureka:
+  client:
+    service-url:
+      # Registry URL for service registration/discovery.
+      defaultZone: http://localhost:8761/eureka/
+
+management:
+  tracing:
+    sampling:
+      # 100% trace sampling for demo visibility.
+      probability: 1.0
+  zipkin:
+    tracing:
+      # Zipkin collector endpoint for distributed traces.
+      endpoint: http://localhost:9411/api/v2/spans
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+logging:
+  pattern:
+    # B3 trace/span IDs in log lines aid distributed request debugging.
+    level: "%5p [traceId=%X{traceId:-},spanId=%X{spanId:-}]"

@@ -1,0 +1,4 @@
+# Production profile reduces noisy internals while keeping platform observability.
+logging:
+  level:
+    com.netflix.eureka: INFO

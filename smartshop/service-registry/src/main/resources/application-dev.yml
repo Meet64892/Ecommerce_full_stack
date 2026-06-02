@@ -1,0 +1,4 @@
+# Development profile keeps verbose logs to teach lease and registration behavior.
+logging:
+  level:
+    com.netflix.eureka: DEBUG

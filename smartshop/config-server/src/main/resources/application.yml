@@ -1,0 +1,30 @@
+server:
+  # Config server listens on canonical Spring Cloud Config port.
+  port: 8888
+
+spring:
+  application:
+    # Logical service name for discovery and logging.
+    name: config-server
+  profiles:
+    # Native profile reads configs from local file system instead of Git.
+    active: native
+  cloud:
+    config:
+      server:
+        native:
+          # Directory containing per-service config files served via /{app}/{profile}.
+          search-locations: file:./config-repo
+
+eureka:
+  client:
+    # Register config server so clients can discover it dynamically.
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # Expose startup and health diagnostics.
+        include: "*"

@@ -1,0 +1,71 @@
+version: "3.9"
+
+services:
+  # PostgreSQL stores relational data for user/product/order/inventory services.
+  postgres:
+    image: postgres:16-alpine
+    container_name: smartshop-postgres
+    environment:
+      # Default superuser used by local services.
+      POSTGRES_USER: smartshop
+      # Development-only password; use secrets manager in production.
+      POSTGRES_PASSWORD: smartshop
+      # Initial bootstrap database used only to run init scripts.
+      POSTGRES_DB: smartshop
+    ports:
+      - "5432:5432"
+    volumes:
+      # Initializes multiple service databases at startup.
+      - ./docker/postgres/init-multiple-dbs.sql:/docker-entrypoint-initdb.d/init-multiple-dbs.sql
+
+  # Redis is an in-memory data store used for caching and rate-limiting tokens.
+  redis:
+    image: redis:7-alpine
+    container_name: smartshop-redis
+    ports:
+      - "6379:6379"
+
+  # Elasticsearch powers full-text product search and faceted filtering.
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
+    container_name: smartshop-elasticsearch
+    environment:
+      # Single-node mode is sufficient for local development.
+      discovery.type: single-node
+      # Disable x-pack security to avoid cert bootstrap overhead locally.
+      xpack.security.enabled: "false"
+      # JVM tuning for local laptop/VM footprint.
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+
+  # Zookeeper coordinates broker metadata for Kafka in classic mode.
+  zookeeper:
+    image: bitnami/zookeeper:3.9
+    container_name: smartshop-zookeeper
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+    ports:
+      - "2181:2181"
+
+  # Kafka transports asynchronous domain events between services.
+  kafka:
+    image: bitnami/kafka:3.6
+    container_name: smartshop-kafka
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    ports:
+      - "9092:9092"
+
+  # Zipkin visualizes distributed traces propagated across service boundaries.
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: smartshop-zipkin
+    ports:
+      - "9411:9411"

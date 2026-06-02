@@ -1,0 +1,55 @@
+server:
+  # Product service port.
+  port: 8082
+
+spring:
+  application:
+    # Service discovery id.
+    name: product-service
+  config:
+    import:
+      # Optional config server import for local startup resilience.
+      - optional:configserver:http://localhost:8888
+  datasource:
+    # PostgreSQL source-of-truth catalog database.
+    url: jdbc:postgresql://localhost:5432/smartshop_products
+    username: smartshop
+    password: smartshop
+  jpa:
+    hibernate:
+      # Flyway owns schema, Hibernate validates mapping.
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    # Enables migration-driven schema evolution.
+    enabled: true
+    baseline-on-migrate: true
+  elasticsearch:
+    # Elasticsearch endpoint for full-text product search index.
+    uris: http://localhost:9200
+
+eureka:
+  client:
+    service-url:
+      # Registry endpoint for service registration.
+      defaultZone: http://localhost:8761/eureka/
+
+management:
+  tracing:
+    sampling:
+      # Enable full trace sampling for educational observability.
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+logging:
+  pattern:
+    # Include trace and span IDs in logs for request path reconstruction.
+    level: "%5p [traceId=%X{traceId:-},spanId=%X{spanId:-}]"
