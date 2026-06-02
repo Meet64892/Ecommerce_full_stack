@@ -1,0 +1,64 @@
+/**
+ * ProfilePage.tsx — User profile view/edit
+ */
+
+import { useForm } from 'react-hook-form';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
+import { useAuth } from '@hooks/useAuth';
+import { userApi } from '@api/userApi';
+import { Input } from '@components/ui/Input';
+import { Button } from '@components/ui/Button';
+import toast from 'react-hot-toast';
+import { parseApiError } from '@utils/errorHandler';
+
+export default function ProfilePage() {
+  const { user, refreshUser } = useAuth();
+  const queryClient = useQueryClient();
+
+  const { data: profile } = useQuery({
+    queryKey: ['user', user?.id],
+    queryFn: () => userApi.getById(user!.id),
+    enabled: !!user?.id,
+    initialData: user ?? undefined,
+  });
+
+  const { register, handleSubmit, reset } = useForm({
+    values: {
+      firstName: profile?.firstName ?? '',
+      lastName: profile?.lastName ?? '',
+      email: profile?.email ?? '',
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: (data: { firstName: string; lastName: string; email: string }) =>
+      userApi.update(user!.id, data),
+    onSuccess: async () => {
+      await refreshUser();
+      void queryClient.invalidateQueries({ queryKey: ['user', user?.id] });
+      toast.success('Profile updated');
+    },
+    onError: (e) => toast.error(parseApiError(e)),
+  });
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-lg">
+      <h1 className="mb-6 text-2xl font-bold">My profile</h1>
+      <form
+        onSubmit={handleSubmit((data) => updateMutation.mutate(data))}
+        className="space-y-4 rounded-xl border bg-white p-6"
+      >
+        <Input label="First name" {...register('firstName')} />
+        <Input label="Last name" {...register('lastName')} />
+        <Input label="Email" type="email" {...register('email')} />
+        <Button type="submit" isLoading={updateMutation.isPending}>
+          Save changes
+        </Button>
+        <Button type="button" variant="ghost" onClick={() => reset()}>
+          Reset
+        </Button>
+      </form>
+    </motion.div>
+  );
+}
