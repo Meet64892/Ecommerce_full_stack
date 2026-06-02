@@ -1,0 +1,110 @@
+# =============================================================================
+# api-gateway application.yml — Routes, rate limiting, circuit breaking
+# =============================================================================
+# This file shows the DECLARATIVE (YAML) routing style. RouteConfig.java shows
+# the programmatic style for the product route. Both feed the same engine.
+# =============================================================================
+
+server:
+  # Single public entry point for all client traffic.
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  # Import externalized config from the config-server. "optional:" means the
+  # gateway still starts if the config server is briefly unavailable (fail-safe),
+  # which is convenient locally. Drop "optional:" for strict fail-fast in prod.
+  config:
+    import: "optional:configserver:http://localhost:8888"
+  data:
+    redis:
+      # Redis backs the distributed rate-limiter counters.
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  cloud:
+    gateway:
+      # Auto-create routes from Eureka service ids is possible, but we define
+      # explicit routes for clarity and to attach per-route filters.
+      discovery:
+        locator:
+          enabled: false
+      # ---- DECLARATIVE ROUTES -------------------------------------------------
+      routes:
+        # --- user-service --------------------------------------------------
+        - id: user-service
+          # lb:// = load-balanced via Eureka discovery.
+          uri: lb://user-service
+          predicates:
+            # Match any request whose path starts with /api/users/.
+            - Path=/api/users/**
+          filters:
+            # Remove the leading "/api" so the service sees /users/**.
+            - StripPrefix=1
+            # Per-user token-bucket rate limiting backed by Redis.
+            - name: RequestRateLimiter
+              args:
+                # Tokens added per second (steady-state allowance).
+                redis-rate-limiter.replenishRate: 10
+                # Max burst the bucket can hold (short spikes).
+                redis-rate-limiter.burstCapacity: 20
+                # KeyResolver bean deciding the bucket key (per user/IP).
+                key-resolver: "#{@userKeyResolver}"
+
+        # --- product-service is defined programmatically in RouteConfig.java --
+
+        # --- order-service (protected by a circuit breaker) ----------------
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/api/orders/**
+          filters:
+            - StripPrefix=1
+            # Wrap calls in a circuit breaker; on OPEN, forward to the fallback.
+            - name: CircuitBreaker
+              args:
+                name: orderCircuitBreaker
+                fallbackUri: forward:/fallback/order-service
+
+        # --- inventory-service ---------------------------------------------
+        - id: inventory-service
+          uri: lb://inventory-service
+          predicates:
+            - Path=/api/inventory/**
+          filters:
+            - StripPrefix=1
+
+        # --- notification-service (no public API; expose only docs/health) --
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - StripPrefix=1
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # /actuator/gateway lets us inspect resolved routes at runtime.
+        include: health,info,gateway,metrics
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URI:http://localhost:9411/api/v2/spans}
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
