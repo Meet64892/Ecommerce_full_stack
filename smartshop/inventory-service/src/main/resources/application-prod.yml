@@ -1,0 +1,11 @@
+# =============================================================================
+# inventory-service application-prod.yml — PROD overrides
+# =============================================================================
+spring:
+  jpa:
+    show-sql: false
+  config:
+    import: "configserver:http://config-server:8888"
+logging:
+  level:
+    com.smartshop: INFO

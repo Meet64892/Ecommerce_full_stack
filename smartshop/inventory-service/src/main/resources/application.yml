@@ -1,0 +1,82 @@
+# =============================================================================
+# inventory-service application.yml — base config (web, JPA, Redis, Kafka)
+# =============================================================================
+
+server:
+  port: 8084
+
+spring:
+  application:
+    name: inventory-service
+  config:
+    import: "optional:configserver:http://localhost:8888"
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/smartshop_inventory}
+    username: ${DB_USER:smartshop}
+    password: ${DB_PASSWORD:smartshop}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  data:
+    redis:
+      # Redis connection used by the cache manager and health indicator.
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+    consumer:
+      group-id: inventory-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+      properties:
+        spring.json.trusted.packages: "com.smartshop.*"
+        # Inbound order.created messages map to this local event type.
+        spring.json.value.default.type: com.smartshop.inventory.event.OrderCreatedEvent
+
+# Cache TTL consumed by RedisConfig (also served by config-repo/inventory-service.yml).
+smartshop:
+  cache:
+    inventory-ttl-seconds: ${INVENTORY_TTL:60}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+      # Group the custom Redis indicator into the readiness probe so a Redis
+      # outage takes the pod out of rotation (but doesn't kill it — liveness).
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: readinessState,redis
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URI:http://localhost:9411/api/v2/spans}
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

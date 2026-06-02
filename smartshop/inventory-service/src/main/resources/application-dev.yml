@@ -1,0 +1,9 @@
+# =============================================================================
+# inventory-service application-dev.yml — DEV overrides
+# =============================================================================
+spring:
+  jpa:
+    show-sql: true
+logging:
+  level:
+    com.smartshop: DEBUG
