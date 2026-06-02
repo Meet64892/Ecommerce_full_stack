@@ -1,0 +1,13 @@
+# Gradle caches and build outputs are machine-local and should be regenerated.
+.gradle/
+build/
+**/build/
+
+# IDE metadata is developer-specific.
+.idea/
+.vscode/
+*.iml
+
+# Runtime logs and temporary files should not be committed.
+*.log
+tmp/

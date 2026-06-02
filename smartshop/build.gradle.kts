@@ -20,7 +20,6 @@ import org.gradle.api.plugins.JavaPluginExtension
 plugins {
     id("org.springframework.boot") version "3.2.3" apply false
     id("io.spring.dependency-management") version "1.1.4" apply false
-    id("java-library") apply false
 }
 
 val springCloudVersion: String by project
@@ -54,10 +53,10 @@ subprojects {
     }
 
     dependencies {
-        compileOnly("org.projectlombok:lombok:$lombokVersion")
-        annotationProcessor("org.projectlombok:lombok:$lombokVersion")
-        annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
-        testImplementation("org.springframework.boot:spring-boot-starter-test")
+        add("compileOnly", "org.projectlombok:lombok:$lombokVersion")
+        add("annotationProcessor", "org.projectlombok:lombok:$lombokVersion")
+        add("annotationProcessor", "org.mapstruct:mapstruct-processor:$mapstructVersion")
+        add("testImplementation", "org.springframework.boot:spring-boot-starter-test")
     }
 
     tasks.withType<JavaCompile> {
