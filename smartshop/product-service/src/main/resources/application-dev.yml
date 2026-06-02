@@ -1,0 +1,4 @@
+# Dev profile shows generated SQL for educational visibility.
+logging:
+  level:
+    org.hibernate.SQL: DEBUG

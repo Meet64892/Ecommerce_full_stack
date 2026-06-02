@@ -1,0 +1,4 @@
+# Dev profile enables detailed cache logging while learning cache-aside behavior.
+logging:
+  level:
+    org.springframework.cache: DEBUG

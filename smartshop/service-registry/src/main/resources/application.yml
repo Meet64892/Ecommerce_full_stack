@@ -1,0 +1,56 @@
+# Server configuration controls the embedded Netty/Tomcat port used by Eureka.
+server:
+  # Eureka conventionally runs on 8761 so developers and tools can find it easily.
+  port: 8761
+
+# Spring settings identify this process to logs, config server, and actuator metadata.
+spring:
+  # application.name becomes the logical service id in many Spring Cloud integrations.
+  application:
+    # The registry has a unique name even though it does not register itself as a client.
+    name: service-registry
+  # optional config import means the registry can start even if config-server is booting later.
+  config:
+    # Config Server supports fail-fast, but optional import is fail-safe for local development.
+    import: optional:configserver:http://localhost:8888
+
+# Eureka server and client settings live under eureka.*.
+eureka:
+  # The server section controls lease eviction behavior.
+  server:
+    # eviction-interval-timer-in-ms controls how often expired leases are scanned.
+    eviction-interval-timer-in-ms: 30000
+    # enable-self-preservation prevents mass eviction during network partitions; false is easier to observe locally.
+    enable-self-preservation: false
+  # A Eureka server also has a client component, but a standalone server should not register with itself.
+  client:
+    # register-with-eureka=false avoids a confusing self-registration entry in the dashboard.
+    register-with-eureka: false
+    # fetch-registry=false because the server already owns the registry and does not need a client-side copy.
+    fetch-registry: false
+    # service-url declares where clients would contact Eureka; included for dashboard links and consistency.
+    service-url:
+      # defaultZone is the conventional Eureka endpoint key used by Spring Cloud Netflix.
+      defaultZone: http://localhost:8761/eureka/
+
+# Actuator exposes operational endpoints for health checks and observability.
+management:
+  # endpoints.web.exposure.include chooses which endpoints are reachable over HTTP.
+  endpoints:
+    web:
+      # Health and info are safe defaults for local operations.
+      exposure:
+        include: health,info
+  # tracing.sampling.probability controls how many requests become Zipkin spans.
+  tracing:
+    sampling:
+      probability: 1.0
+  # zipkin.tracing.endpoint points Micrometer/Brave at the tracing collector.
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+
+# Logging pattern includes traceId/spanId once Micrometer places them in MDC via B3 propagation headers.
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

@@ -1,0 +1,4 @@
+# Dev profile enables SQL visibility for learning and debugging.
+logging:
+  level:
+    org.hibernate.SQL: DEBUG

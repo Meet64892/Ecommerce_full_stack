@@ -1,0 +1,56 @@
+# User-service HTTP port.
+server:
+  port: 8081
+
+# Spring application, config, datasource, JPA, and Flyway settings.
+spring:
+  application:
+    name: user-service
+  config:
+    import: optional:configserver:http://localhost:8888
+  datasource:
+    url: jdbc:postgresql://localhost:5432/smartshop_users
+    username: smartshop
+    password: smartshop
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  kafka:
+    bootstrap-servers: localhost:29092
+
+# JWT settings used by user-service and the gateway.
+security:
+  jwt:
+    secret: "smartshop-demo-secret-key-that-is-long-enough-for-hs256-signing"
+    expiration-seconds: 3600
+
+# Eureka discovery settings.
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+# Actuator exposes health; liveness means process is alive, readiness means dependencies are ready for traffic.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+
+# Include trace and span ids propagated via B3 headers in every log line.
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

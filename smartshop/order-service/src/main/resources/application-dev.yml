@@ -1,0 +1,4 @@
+# Dev profile keeps SQL visible while learning transaction behavior.
+logging:
+  level:
+    org.hibernate.SQL: DEBUG

@@ -1,0 +1,6 @@
+# Dev profile keeps notifications mocked and visible in logs.
+notification:
+  mock: true
+logging:
+  level:
+    com.smartshop.notification: DEBUG

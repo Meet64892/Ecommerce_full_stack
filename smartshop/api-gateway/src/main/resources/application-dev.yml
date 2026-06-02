@@ -1,0 +1,4 @@
+# Dev profile keeps route diagnostics visible.
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG

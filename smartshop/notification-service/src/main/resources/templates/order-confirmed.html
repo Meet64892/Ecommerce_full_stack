@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>SmartShop Order Update</title></head>
+<body>
+  <h1>SmartShop order update</h1>
+  <p th:text="'Hello customer ' + ${userId} + ','">Hello customer,</p>
+  <p th:if="${reason == null}" th:text="'Your order ' + ${orderId} + ' has been confirmed.'">Your order has been confirmed.</p>
+  <p th:if="${reason != null}" th:text="'Your order ' + ${orderId} + ' was cancelled: ' + ${reason}">Your order was cancelled.</p>
+  <p>Thank you for shopping with SmartShop.</p>
+</body>
+</html>

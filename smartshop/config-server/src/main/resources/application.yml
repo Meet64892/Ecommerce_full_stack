@@ -1,0 +1,38 @@
+# Config Server HTTP port.
+server:
+  # Port 8888 is the Spring Cloud Config convention.
+  port: 8888
+
+# Spring settings configure the config server backend.
+spring:
+  # application.name identifies this service in logs and actuator output.
+  application:
+    name: config-server
+  # profiles.active=native tells Config Server to read local files instead of Git.
+  profiles:
+    active: native
+  # cloud.config.server controls the backing repository that serves {application}/{profile} requests.
+  cloud:
+    config:
+      server:
+        native:
+          # search-locations points to a classpath folder packaged with this demo server.
+          search-locations: classpath:/config-repo
+
+# Actuator health helps operators know whether the config endpoint is alive.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+
+# Include trace identifiers in logs so configuration lookups can be correlated.
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

@@ -1,0 +1,12 @@
+# Prod profile sends real email and reads SMTP/Kafka settings from the environment.
+notification:
+  mock: false
+  from: ${NOTIFICATION_FROM}
+spring:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+  mail:
+    host: ${SMTP_HOST}
+    port: ${SMTP_PORT}
+    username: ${SMTP_USERNAME}
+    password: ${SMTP_PASSWORD}

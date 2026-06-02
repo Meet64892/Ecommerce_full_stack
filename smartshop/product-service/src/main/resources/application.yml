@@ -1,0 +1,50 @@
+# Product-service HTTP port.
+server:
+  port: 8082
+
+# Spring application, config client, database, JPA, Flyway, and Elasticsearch settings.
+spring:
+  application:
+    name: product-service
+  config:
+    import: optional:configserver:http://localhost:8888
+  datasource:
+    url: jdbc:postgresql://localhost:5432/smartshop_products
+    username: smartshop
+    password: smartshop
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  elasticsearch:
+    uris: http://localhost:9200
+
+# Eureka registration lets the gateway route to product-service by logical name.
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+# Actuator and distributed tracing settings.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+
+# Trace ids in logs connect product requests with gateway and downstream spans.
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

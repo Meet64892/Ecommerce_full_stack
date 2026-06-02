@@ -1,0 +1,5 @@
+# Spring profiles let one artifact run with environment-specific values.
+eureka:
+  server:
+    # Dev disables self-preservation so stopped services disappear quickly while learning Eureka behavior.
+    enable-self-preservation: false

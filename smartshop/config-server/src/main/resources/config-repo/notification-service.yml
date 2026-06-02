@@ -1,0 +1,15 @@
+# Sample centralized configuration for notification-service.
+server:
+  # Port is repeated here to demonstrate how Config Server can override local defaults by profile.
+  port: 8085
+
+spring:
+  application:
+    # The application name must match the filename for Spring Cloud Config lookup.
+    name: notification-service
+
+management:
+  tracing:
+    sampling:
+      # Local education samples every request so Zipkin shows complete traces.
+      probability: 1.0
