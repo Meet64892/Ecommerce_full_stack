@@ -1,0 +1,11 @@
+# =============================================================================
+# product-service application-dev.yml — DEV overrides
+# =============================================================================
+spring:
+  jpa:
+    show-sql: true
+logging:
+  level:
+    com.smartshop: DEBUG
+    # See the queries Spring Data Elasticsearch issues while learning.
+    org.springframework.data.elasticsearch.client.WIRE: TRACE

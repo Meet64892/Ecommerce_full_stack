@@ -1,0 +1,65 @@
+# =============================================================================
+# product-service application.yml — base config
+# =============================================================================
+
+server:
+  port: 8082
+
+spring:
+  application:
+    name: product-service
+  config:
+    import: "optional:configserver:http://localhost:8888"
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/smartshop_products}
+    username: ${DB_USER:smartshop}
+    password: ${DB_PASSWORD:smartshop}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      # Flyway owns the schema; Hibernate only validates entity<->table alignment.
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  # Elasticsearch repositories auto-create the "products" index from @Document.
+  elasticsearch:
+    # Spring Boot's own ES client property (host:port list). Mirrored by our
+    # ElasticsearchConfig bean for explicit ClientConfiguration control.
+    uris: ${ES_URIS:localhost:9200}
+
+# Custom prefix consumed by ElasticsearchConfig (host:port, no scheme).
+smartshop:
+  elasticsearch:
+    uris: ${ES_URIS:localhost:9200}
+  search:
+    default-page-size: 20
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URI:http://localhost:9411/api/v2/spans}
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
