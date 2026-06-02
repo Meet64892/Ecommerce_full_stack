@@ -1,0 +1,17 @@
+/**
+ * animations.css — Custom keyframes referenced by Framer Motion / Tailwind
+ */
+
+@keyframes cart-bounce {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+.cart-bounce {
+  animation: cart-bounce 0.4s ease;
+}

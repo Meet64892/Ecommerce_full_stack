@@ -1,0 +1,24 @@
+/**
+ * globals.css — Tailwind layers and CSS variables
+ *
+ * PURPOSE:
+ * @tailwind directives inject utility classes. CSS variables support theming beyond Tailwind config.
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-background: #f9fafb;
+  --color-surface: #ffffff;
+  --color-text: #111827;
+}
+
+body {
+  @apply bg-gray-50 font-sans text-gray-900 antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
