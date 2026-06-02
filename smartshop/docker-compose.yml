@@ -48,7 +48,7 @@ services:
 
   # Zookeeper coordinates Kafka brokers in this educational setup; newer Kafka can run without it, but many teams still encounter this deployment shape.
   zookeeper:
-    image: bitnami/zookeeper:3.9
+    image: bitnamilegacy/zookeeper:3.9
     container_name: smartshop-zookeeper
     environment:
       # ALLOW_ANONYMOUS_LOGIN is acceptable only for local development.
@@ -58,13 +58,15 @@ services:
 
   # Kafka carries asynchronous domain events such as order creation and inventory replies.
   kafka:
-    image: bitnami/kafka:3.6
+    image: bitnamilegacy/kafka:3.6
     container_name: smartshop-kafka
     depends_on:
       - zookeeper
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       # KAFKA_CFG_ZOOKEEPER_CONNECT tells the broker where its coordinator is running.
-      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CFG_ZOOKEEPER_CONNECT: host.docker.internal:2181
       # KAFKA_CFG_LISTENERS declares internal and external listener names.
       KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
       # KAFKA_CFG_ADVERTISED_LISTENERS tells clients which host/port to use from inside and outside Docker.
@@ -75,6 +77,11 @@ services:
       KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       # ALLOW_PLAINTEXT_LISTENER is safe only on a developer machine.
       ALLOW_PLAINTEXT_LISTENER: "yes"
+      # Single-broker local cluster: default replication factor 3 fails topic creation.
+      KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_CFG_DEFAULT_REPLICATION_FACTOR: 1
     ports:
       - "29092:29092"
 
