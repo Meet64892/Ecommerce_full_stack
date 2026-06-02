@@ -1,0 +1,9 @@
+# =============================================================================
+# config-repo/inventory-service.yml — Config served to the inventory-service
+# =============================================================================
+
+smartshop:
+  cache:
+    # Time-to-live (seconds) for cached inventory entries in Redis. A short TTL
+    # bounds how stale a cache read can be even if an eviction event is missed.
+    inventory-ttl-seconds: 60

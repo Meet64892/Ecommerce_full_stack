@@ -1,0 +1,31 @@
+# =============================================================================
+# config-server application.yml — Spring Cloud Config Server configuration
+# =============================================================================
+
+server:
+  # Conventional Config Server port; clients import from http://localhost:8888.
+  port: 8888
+
+spring:
+  application:
+    name: config-server
+  profiles:
+    # The "native" profile serves config from the local filesystem/classpath
+    # instead of a remote Git repo. Perfect for a self-contained learning setup;
+    # in production you would typically use the default git backend for history
+    # and access control.
+    active: native
+  cloud:
+    config:
+      server:
+        native:
+          # Where the served configuration files live. We point at the
+          # config-repo folder packaged on the classpath. Each file is named
+          # {application}.yml (and optionally {application}-{profile}.yml).
+          search-locations: classpath:/config-repo
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

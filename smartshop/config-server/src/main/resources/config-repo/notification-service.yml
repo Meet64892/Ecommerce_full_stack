@@ -1,0 +1,8 @@
+# =============================================================================
+# config-repo/notification-service.yml — Config served to notification-service
+# =============================================================================
+
+smartshop:
+  notification:
+    # "from" address stamped on outbound emails. Overridden per environment.
+    from-address: ${MAIL_FROM:no-reply@smartshop.dev}

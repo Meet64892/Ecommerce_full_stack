@@ -1,0 +1,50 @@
+# =============================================================================
+# service-registry application.yml — Eureka Server configuration
+# =============================================================================
+
+server:
+  # The well-known Eureka port. Clients default to expecting the registry here.
+  port: 8761
+
+spring:
+  application:
+    # Logical name shown in logs/tracing. Even the registry has a name.
+    name: service-registry
+
+eureka:
+  instance:
+    # Prefer resolving instances by hostname (stable in docker-compose where the
+    # service name is a resolvable DNS entry) rather than a container IP.
+    hostname: localhost
+  client:
+    # WHY false on the server itself:
+    # registerWithEureka=false  -> the registry must not try to register as a
+    #   client of *itself* (it IS the registry; there is no other server to
+    #   register into in this single-node dev setup).
+    register-with-eureka: false
+    # fetchRegistry=false -> the server does not need to download a registry
+    #   from a peer; it owns the authoritative copy. (In an HA cluster of
+    #   multiple Eureka servers you would set both true so peers replicate.)
+    fetch-registry: false
+    service-url:
+      # Where clients should POST registrations / GET the registry. Points back
+      # at this same node in single-server mode.
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+  server:
+    # Disable self-preservation in DEV so dead instances are evicted quickly and
+    # the dashboard reflects reality. In PROD you typically leave this ON to
+    # tolerate transient network partitions.
+    enable-self-preservation: false
+    # How often (ms) Eureka runs the eviction task that removes expired leases.
+    eviction-interval-timer-in-ms: 15000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # Expose health + info so Kubernetes/Docker can probe the registry.
+        include: health,info
+  endpoint:
+    health:
+      # Show component details (disk, ping) on the health endpoint.
+      show-details: always

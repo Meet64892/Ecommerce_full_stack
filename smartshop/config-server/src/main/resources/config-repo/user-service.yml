@@ -1,0 +1,15 @@
+# =============================================================================
+# config-repo/user-service.yml — Config served to the user-service
+# =============================================================================
+# Demonstrates per-application config served by {application} resolution. The
+# user-service imports this at startup and merges it over the global
+# application.yml above.
+# =============================================================================
+
+jwt:
+  # HMAC signing secret for HS256. MUST be overridden by an environment secret
+  # in production; this dev default is intentionally obvious.
+  secret: ${JWT_SECRET:smartshop-dev-secret-key-change-me-in-production-please-32bytes}
+  # Token lifetime in milliseconds (24h). Short enough to limit blast radius if
+  # leaked, long enough to be convenient for a demo.
+  expiration-ms: 86400000

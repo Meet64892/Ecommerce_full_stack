@@ -1,0 +1,9 @@
+# =============================================================================
+# config-repo/product-service.yml — Config served to the product-service
+# =============================================================================
+
+smartshop:
+  search:
+    # Default page size for catalog/search endpoints. Centralized so the value
+    # is consistent and tunable without a redeploy.
+    default-page-size: 20

@@ -1,0 +1,13 @@
+# =============================================================================
+# config-repo/order-service.yml — Config served to the order-service
+# =============================================================================
+
+smartshop:
+  kafka:
+    topics:
+      # Centralized topic names so producer (order) and consumers (inventory,
+      # notification) never drift out of sync.
+      order-created: order.created
+      order-confirmed: order.confirmed
+      order-cancelled: order.cancelled
+      inventory-checked: inventory.checked
