@@ -1,0 +1,279 @@
+version: '3.8'
+
+# =============================================================================
+# SmartShop Infrastructure - docker-compose.yml
+# =============================================================================
+#
+# WHAT THIS FILE DOES:
+# Starts all infrastructure services that SmartShop's microservices depend on.
+# Run ALL services: docker-compose up -d
+# Run specific services: docker-compose up -d postgres redis
+# View logs: docker-compose logs -f kafka
+# Stop all: docker-compose down
+# Stop and delete data: docker-compose down -v
+#
+# STARTUP ORDER: Some services depend on others being healthy first.
+# docker-compose handles basic ordering via `depends_on`, but healthy
+# dependencies require `healthcheck` + `depends_on: condition: service_healthy`.
+# =============================================================================
+
+# Named volumes persist data across container restarts.
+# Without named volumes, all data is lost when containers stop.
+volumes:
+  postgres_data:      # PostgreSQL data files (databases, tables, rows)
+  redis_data:         # Redis snapshots (RDB or AOF persistence files)
+  elasticsearch_data: # Elasticsearch index data (shards and segments)
+  zookeeper_data:     # ZooKeeper znodes (Kafka cluster metadata)
+  zookeeper_logs:     # ZooKeeper transaction logs
+  kafka_data:         # Kafka topic data (message segments)
+  zipkin_data:        # Zipkin trace storage
+
+# Custom bridge network: all containers can communicate by service name.
+# Example: postgres is reachable at hostname "postgres" within this network.
+# Without a custom network, containers can't reference each other by name.
+networks:
+  smartshop-network:
+    driver: bridge
+
+services:
+
+  # ===========================================================================
+  # POSTGRESQL — Primary Relational Database
+  # Used by: user-service, product-service, order-service, inventory-service
+  # Each service uses its own DATABASE within this single PostgreSQL instance.
+  # In production, each service would have its own PostgreSQL cluster.
+  # ===========================================================================
+  postgres:
+    image: postgres:16-alpine  # Alpine = smaller image size than debian-based
+    container_name: smartshop-postgres
+    restart: unless-stopped   # Restart if it crashes; don't restart if manually stopped
+    environment:
+      # POSTGRES_USER: the superuser account (avoid using "postgres" in production)
+      POSTGRES_USER: smartshop
+      POSTGRES_PASSWORD: smartshop_password
+      # POSTGRES_DB creates an initial database. We create service-specific DBs via init script.
+      POSTGRES_DB: smartshop_main
+      # Tune PostgreSQL for development (not production-tuned)
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=en_US.UTF-8 --lc-ctype=en_US.UTF-8"
+    ports:
+      # Host:Container port mapping
+      # Connect from host machine: psql -h localhost -p 5432 -U smartshop
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Init scripts run ONCE when the container is first created.
+      # These create the service-specific databases.
+      - ./init-scripts/postgres-init.sql:/docker-entrypoint-initdb.d/01-init.sql
+    healthcheck:
+      # pg_isready checks if PostgreSQL is accepting connections
+      test: ["CMD-SHELL", "pg_isready -U smartshop -d smartshop_main"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - smartshop-network
+
+  # ===========================================================================
+  # REDIS — In-Memory Cache and Rate Limiting Store
+  # Used by: inventory-service (caching), api-gateway (rate limiting)
+  # ===========================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: smartshop-redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+    # --appendonly yes: Enable AOF persistence (append-only file)
+    # AOF persistence: every write is appended to a log file.
+    # Without persistence, all cache data is lost on Redis restart.
+    # --appendfsync everysec: sync to disk every second (balance of performance vs durability)
+    # --maxmemory 256mb: cap Redis memory usage at 256MB
+    # --maxmemory-policy allkeys-lru: when memory is full, evict least recently used keys
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - smartshop-network
+
+  # ===========================================================================
+  # ELASTICSEARCH — Full-Text Search Engine
+  # Used by: product-service (product search with inverted index)
+  # Version must match the elasticsearch-java client version in build.gradle.kts
+  # ===========================================================================
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
+    container_name: smartshop-elasticsearch
+    restart: unless-stopped
+    environment:
+      # discovery.type=single-node: Run as a single-node cluster.
+      # In production, you'd have 3+ nodes for HA and horizontal scaling.
+      # Single-node means: no replication (replicas must be 0), simpler setup.
+      - discovery.type=single-node
+      # Disable Elasticsearch's security features (X-Pack) for development.
+      # In production: enable security, set a password for the "elastic" user,
+      # configure TLS, and pass credentials in the Spring config.
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      # JVM heap size: min and max set equal to prevent heap resizing (performance)
+      # Development: 512MB. Production: tune based on dataset size (50% of available RAM max).
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"  # HTTP API (used by Spring Data Elasticsearch)
+      - "9300:9300"  # TCP transport (internal cluster communication)
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s  # ES takes longer to start than most services
+    networks:
+      - smartshop-network
+
+  # ===========================================================================
+  # ZOOKEEPER — Distributed Coordination for Kafka
+  # Kafka uses ZooKeeper for: leader election, broker registration, topic metadata.
+  # NOTE: Kafka 2.8+ can run without ZooKeeper (KRaft mode), but Bitnami images
+  # still use ZooKeeper for better production stability.
+  # ===========================================================================
+  zookeeper:
+    image: bitnami/zookeeper:3.8
+    container_name: smartshop-zookeeper
+    restart: unless-stopped
+    environment:
+      # Allow anonymous connections (disable auth for development)
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+      # ZooKeeper tick time: base unit for timeouts (2000ms = 2 seconds)
+      ZOO_TICK_TIME: 2000
+      # How long a follower can lag behind the leader before being rejected
+      ZOO_INIT_LIMIT: 10
+      ZOO_SYNC_LIMIT: 5
+    ports:
+      - "2181:2181"
+    volumes:
+      - zookeeper_data:/bitnami/zookeeper/data
+      - zookeeper_logs:/bitnami/zookeeper/log
+    healthcheck:
+      test: ["CMD-SHELL", "echo ruok | nc localhost 2181 | grep imok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - smartshop-network
+
+  # ===========================================================================
+  # KAFKA — Distributed Message Streaming Platform
+  # Used by: order-service (producer), inventory-service (consumer), notification-service (consumer)
+  #
+  # WHY KAFKA?
+  # - High throughput: millions of messages per second
+  # - Durability: messages persisted to disk, replicated across brokers
+  # - Replay: consumers can re-read historical messages (unlike RabbitMQ)
+  # - Horizontal scaling: add more partitions and consumers for more throughput
+  # ===========================================================================
+  kafka:
+    image: bitnami/kafka:3.6
+    container_name: smartshop-kafka
+    restart: unless-stopped
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    environment:
+      # Kafka broker connection to ZooKeeper
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      # Listeners: how Kafka accepts connections
+      # PLAINTEXT://0.0.0.0:9092: for inter-container communication (within Docker network)
+      # EXTERNAL://0.0.0.0:9093: for connections from the host machine
+      KAFKA_CFG_LISTENERS: PLAINTEXT://0.0.0.0:9092,EXTERNAL://0.0.0.0:9093
+      # Advertised listeners: what Kafka tells clients to use for subsequent connections
+      # PLAINTEXT://kafka:9092: containers use the service name "kafka"
+      # EXTERNAL://localhost:9093: host machine uses localhost
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:9093
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      # Auto-create topics: new topics are created automatically when first published to.
+      # Set to false in production for tighter control over topic configuration.
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+      # Default replication factor (1 for single-broker dev setup; 3 for production)
+      KAFKA_CFG_DEFAULT_REPLICATION_FACTOR: 1
+      # Offset retention: how long to keep consumer group offsets (7 days)
+      KAFKA_CFG_OFFSETS_RETENTION_MINUTES: 10080
+      # Message retention: how long to keep messages in topics (7 days)
+      KAFKA_CFG_LOG_RETENTION_HOURS: 168
+    ports:
+      - "9092:9092"    # Internal (container-to-container)
+      - "9093:9093"    # External (host machine → Kafka for testing with kafka-ui, etc.)
+    volumes:
+      - kafka_data:/bitnami/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - smartshop-network
+
+  # ===========================================================================
+  # ZIPKIN — Distributed Tracing UI
+  # All microservices send traces here via Micrometer Tracing + Brave reporter.
+  # Access the UI at http://localhost:9411 to trace requests across services.
+  #
+  # HOW DISTRIBUTED TRACING WORKS:
+  # Each service adds trace headers (B3 format) to outgoing requests.
+  # These headers propagate through service calls:
+  # Browser → Gateway → user-service → (order-service) → Kafka → ...
+  # Zipkin visualizes the complete request tree with timing information.
+  # ===========================================================================
+  zipkin:
+    image: openzipkin/zipkin:3
+    container_name: smartshop-zipkin
+    restart: unless-stopped
+    environment:
+      # In-memory storage: traces are lost on restart.
+      # Production: use Elasticsearch or Cassandra storage:
+      # STORAGE_TYPE: elasticsearch
+      # ES_HOSTS: http://elasticsearch:9200
+      STORAGE_TYPE: mem
+    ports:
+      - "9411:9411"  # Zipkin UI + HTTP API for trace ingestion
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:9411/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - smartshop-network
+
+  # ===========================================================================
+  # KAFKA UI — Web UI for Kafka Management (Optional, Development Only)
+  # Browse topics, consumer groups, messages without CLI tools
+  # Access at: http://localhost:8090
+  # ===========================================================================
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: smartshop-kafka-ui
+    restart: unless-stopped
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_CLUSTERS_0_NAME: smartshop-local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    ports:
+      - "8090:8080"
+    networks:
+      - smartshop-network

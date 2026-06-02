@@ -1,0 +1,47 @@
+# =============================================================================
+# .gitignore for SmartShop Gradle Project
+# =============================================================================
+
+# --- Gradle Build Outputs ---
+.gradle/
+build/
+*/build/
+out/
+
+# --- IDE Files ---
+.idea/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# --- OS Files ---
+.DS_Store
+Thumbs.db
+
+# --- Spring Boot ---
+*.log
+logs/
+application-prod.yml  # Never commit production config!
+
+# --- Secrets ---
+*.p12
+*.jks
+*.pem
+*.key
+secrets.properties
+
+# --- Docker ---
+docker-compose.override.yml
+
+# --- Compiled Class Files ---
+*.class
+
+# --- Gradle Wrapper (keep the wrapper script, ignore generated files) ---
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties

@@ -1,0 +1,98 @@
+# =============================================================================
+# service-registry/application.yml — Eureka Server Configuration
+# =============================================================================
+#
+# This file configures the Eureka service registry server.
+# Every setting below is explained to make the configuration self-documenting.
+# =============================================================================
+
+# --- Server Configuration ---
+server:
+  # Port 8761 is the conventional default for Eureka Server.
+  # All microservices default to looking for Eureka at http://localhost:8761/eureka/
+  # Using the default avoids having to configure eureka.client.service-url in every service.
+  port: 8761
+
+# --- Spring Application Identity ---
+spring:
+  application:
+    # The service name as it appears in the Eureka dashboard and in logs.
+    # Other services do NOT look up "service-registry" by name, so this is for
+    # identification purposes only.
+    name: service-registry
+
+  # --- Spring Cloud Config Client ---
+  # The config server fetches its own config from itself (when using native profile),
+  # but in practice the registry doesn't need centralized config — it must start
+  # BEFORE the config server in production startup ordering.
+  config:
+    # import: optional:configserver: — disabled here to avoid circular dependency:
+    # config-server needs registry (to register), registry needs config-server (for config).
+    # Solution: registry uses only its local application.yml.
+    import: "optional:configserver:"
+
+# --- Eureka Server Configuration ---
+eureka:
+  instance:
+    # The hostname used in the Eureka dashboard and for instance discovery.
+    # "localhost" works for development; in production, use the actual DNS name
+    # or Kubernetes service name.
+    hostname: localhost
+
+  client:
+    # WHY registerWithEureka: false?
+    # By default, every Eureka-enabled application registers ITSELF with the registry
+    # (because eureka-server includes eureka-client on its classpath).
+    # A standalone Eureka server doesn't need to register with itself — there's no
+    # reason for the registry to appear in its own registry.
+    # In a clustered Eureka setup (multiple Eureka servers for HA), you WOULD set
+    # this to true so servers can replicate registry data to each other.
+    registerWithEureka: false
+
+    # WHY fetchRegistry: false?
+    # Normally, Eureka clients periodically download the full registry from the server
+    # to cache it locally (for faster lookups when the server is temporarily unavailable).
+    # The server itself doesn't need a local cache of the registry — it IS the registry.
+    # Setting this to false saves memory and removes unnecessary HTTP calls to itself.
+    fetchRegistry: false
+
+    # The URL this Eureka server uses to communicate with OTHER Eureka servers
+    # (for registry replication in a cluster). With a single server, this is self-referential.
+    serviceUrl:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+
+  server:
+    # In development, Eureka's self-preservation mode can be annoying:
+    # it prevents eviction of stale instances when heartbeat rates drop.
+    # Disabled here to make development easier (dead services are evicted quickly).
+    # IMPORTANT: Enable this in production to prevent mass deregistration during
+    # temporary network issues (network partition vs service failure).
+    enableSelfPreservation: false
+
+    # How often (milliseconds) the registry runs its eviction task.
+    # With self-preservation disabled, stale instances are cleaned up every 2 seconds.
+    # Default is 60000ms (1 minute) — too slow for development.
+    evictionIntervalTimerInMs: 2000
+
+# --- Actuator Configuration ---
+management:
+  endpoints:
+    web:
+      exposure:
+        # Expose all actuator endpoints for monitoring and diagnostics.
+        # In production, restrict this to: health, info, metrics
+        include: "*"
+  endpoint:
+    health:
+      # "always" shows full health details including sub-components.
+      # Options: never, when-authorized, always
+      show-details: always
+
+# --- Logging Configuration ---
+logging:
+  level:
+    # Reduce Eureka's verbose logging during development.
+    # Eureka logs a lot of heartbeat/lease info at INFO level which clutters the console.
+    com.netflix.eureka: WARN
+    com.netflix.discovery: WARN
+    root: INFO

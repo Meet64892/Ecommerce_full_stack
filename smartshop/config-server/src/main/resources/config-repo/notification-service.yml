@@ -1,0 +1,37 @@
+# =============================================================================
+# config-repo/notification-service.yml — Configuration for notification-service
+# =============================================================================
+
+server:
+  port: 8085
+
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: notification-service-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+
+  # Mail configuration (using a mock/dev SMTP for development)
+  mail:
+    host: smtp.mailtrap.io
+    port: 587
+    username: ${MAIL_USERNAME:dev-username}
+    password: ${MAIL_PASSWORD:dev-password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+notification:
+  email:
+    from: noreply@smartshop.com
+    from-name: SmartShop Notifications
+
+logging:
+  level:
+    com.smartshop.notification: DEBUG

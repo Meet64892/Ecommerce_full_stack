@@ -1,0 +1,54 @@
+# =============================================================================
+# product-service/application.yml
+# =============================================================================
+spring:
+  application:
+    name: product-service
+  config:
+    import: "optional:configserver:http://localhost:8888"
+  datasource:
+    url: jdbc:postgresql://localhost:5432/smartshop_products
+    username: smartshop
+    password: smartshop_password
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  elasticsearch:
+    uris: http://localhost:9200
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+server:
+  port: 8082
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    preferIpAddress: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    sampling:
+      probability: 1.0
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    com.smartshop.product: DEBUG
+    root: INFO

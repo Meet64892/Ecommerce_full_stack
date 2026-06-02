@@ -1,0 +1,43 @@
+# =============================================================================
+# config-repo/user-service.yml — Configuration for user-service
+# Fetched by user-service at startup via Spring Cloud Config Client
+# =============================================================================
+
+server:
+  port: 8081
+
+spring:
+  datasource:
+    # In production, use environment variable substitution: ${DB_PASSWORD}
+    # The config server can also encrypt this: {cipher}EncryptedValue
+    url: jdbc:postgresql://localhost:5432/smartshop_users
+    username: smartshop
+    password: smartshop_password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate   # Flyway manages schema; JPA should only validate, never create/alter
+    show-sql: false        # Enable in dev for debugging, disable in prod for performance
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+# JWT Configuration
+# SECURITY NOTE: In production, store the secret in Vault or AWS Secrets Manager,
+# not in this config file (even if the config server encrypts it)
+jwt:
+  secret: "SmartShopJwtSecretKey2024VeryLongAndSecureKeyForHS256Algorithm"
+  expiration-ms: 86400000    # 24 hours in milliseconds (1000 * 60 * 60 * 24)
+  refresh-expiration-ms: 604800000  # 7 days for refresh tokens
+
+logging:
+  level:
+    com.smartshop.user: DEBUG
+    org.springframework.security: DEBUG

@@ -1,0 +1,93 @@
+# =============================================================================
+# user-service/application.yml — Bootstrap Configuration
+# Full config is loaded from config-server at startup
+# =============================================================================
+
+spring:
+  application:
+    name: user-service    # Used to request config: GET /user-service/default from config-server
+
+  config:
+    import: "optional:configserver:http://localhost:8888"
+    # "optional:" means: if config-server is unavailable at startup, use local config.
+    # In production, remove "optional:" to fail-fast when config-server is down.
+    # fail-fast = true (below) is the production setting.
+
+  profiles:
+    active: dev   # Default profile: dev. Overridden by SPRING_PROFILES_ACTIVE env var in prod.
+
+  # --- Local fallback config (used when config-server is unavailable) ---
+  datasource:
+    url: jdbc:postgresql://localhost:5432/smartshop_users
+    username: smartshop
+    password: smartshop_password
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      # HikariCP is Spring Boot's default connection pool.
+      # Pool size = max concurrent DB operations. Too small = requests wait. Too large = DB overloaded.
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000    # 30s: throw exception if no connection available within this time
+      idle-timeout: 600000         # 10min: close idle connections after this time
+      max-lifetime: 1800000        # 30min: force close/reopen connections to prevent stale connections
+
+  jpa:
+    hibernate:
+      ddl-auto: validate    # NEVER use create/update in production — Flyway manages the schema
+    show-sql: false
+    open-in-view: false     # Disable OSIV: prevents lazy loading in presentation layer (a common bug)
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        default_batch_fetch_size: 100  # Batch fetch for @OneToMany to reduce N+1 queries
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true    # For existing databases: create baseline version if history table is missing
+
+server:
+  port: 8081
+
+# JWT settings (defaults — overridden by config-server)
+jwt:
+  secret: "SmartShopJwtSecretKey2024VeryLongAndSecureKeyForHS256Algorithm"
+  expiration-ms: 86400000    # 24 hours
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    preferIpAddress: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    sampling:
+      probability: 1.0
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha       # Sort tags alphabetically in the UI
+    operations-sorter: alpha # Sort operations alphabetically
+
+logging:
+  level:
+    com.smartshop.user: DEBUG
+    org.springframework.security: INFO
+    org.flywaydb: INFO
+    root: INFO
+  pattern:
+    # Include traceId and spanId in log lines for distributed tracing correlation
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%X{traceId:-}] [%X{spanId:-}] %-5level %logger{36} - %msg%n"

@@ -1,0 +1,80 @@
+# =============================================================================
+# api-gateway/application.yml — API Gateway Bootstrap Configuration
+# The full config is served by config-server (api-gateway.yml in config-repo)
+# =============================================================================
+
+spring:
+  application:
+    name: api-gateway    # Used to fetch config from config-server as: GET /api-gateway/default
+
+  # Spring Cloud Config Client: fetch config from config-server at startup
+  # spring.config.import is the Spring Boot 2.4+ way to configure config imports
+  config:
+    import: "optional:configserver:http://localhost:8888"
+
+  # Redis is needed locally for rate limiting (RedisRateLimiter)
+  # The config-repo/api-gateway.yml provides the full Redis config;
+  # these are just enough to bootstrap before config-server is available
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+server:
+  port: 8080
+
+# Eureka Client Registration — register gateway with service registry
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+    registerWithEureka: true
+    fetchRegistry: true
+  instance:
+    preferIpAddress: true
+
+# Spring Cloud Gateway route configuration (YAML approach)
+# NOTE: These duplicate some routes from RouteConfig.java to demonstrate
+# that BOTH yaml and java approaches can coexist. In practice, pick one.
+spring:
+  cloud:
+    gateway:
+      # Default filters applied to ALL routes
+      default-filters:
+        # AddResponseHeader: adds a header to every response
+        - AddResponseHeader=X-Response-Source, SmartShop-Gateway
+      routes:
+        # --- User Service Auth Routes (no JWT required) ---
+        - id: user-service-auth-yaml
+          uri: lb://user-service
+          predicates:
+            # Path predicate: only routes matching /api/auth/** go here
+            - Path=/api/auth/**
+          filters:
+            # StripPrefix=1: removes "/api" → user-service sees /auth/...
+            - StripPrefix=1
+            # RequestRateLimiter: limits requests using Redis token bucket
+            # key-resolver: use the ipKeyResolver bean for unauthenticated endpoints
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 5    # 5 requests/second per IP
+                redis-rate-limiter.burstCapacity: 10   # allow bursts up to 10
+                redis-rate-limiter.requestedTokens: 1
+                key-resolver: "#{@ipKeyResolver}"
+
+# Actuator endpoints configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway,metrics
+  endpoint:
+    health:
+      show-details: always
+    gateway:
+      enabled: true    # Enable gateway-specific actuator endpoints (/actuator/gateway/routes)
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    com.smartshop.gateway: DEBUG

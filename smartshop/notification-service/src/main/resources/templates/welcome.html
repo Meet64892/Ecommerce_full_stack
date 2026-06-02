@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to SmartShop</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 40px; text-align: center; }
+        .content { padding: 30px; color: #555; line-height: 1.6; }
+        .btn { display: inline-block; background: #667eea; color: white; padding: 14px 28px; border-radius: 4px; text-decoration: none; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Welcome to SmartShop! 🛍️</h1>
+    </div>
+    <div class="content">
+        <p>Hi <strong th:text="${username}">Friend</strong>,</p>
+        <p>Welcome to SmartShop! Your account has been created successfully.</p>
+        <p>Start exploring thousands of products with the best prices.</p>
+        <a href="#" class="btn">Start Shopping</a>
+        <p style="color: #888; font-size: 12px; margin-top: 30px;">
+            If you didn't create this account, please contact <a th:href="'mailto:' + ${supportEmail}" th:text="${supportEmail}">support@smartshop.com</a>
+        </p>
+    </div>
+</div>
+</body>
+</html>

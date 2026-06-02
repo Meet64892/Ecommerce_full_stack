@@ -1,0 +1,61 @@
+# =============================================================================
+# inventory-service/application.yml
+# =============================================================================
+spring:
+  application:
+    name: inventory-service
+  config:
+    import: "optional:configserver:http://localhost:8888"
+  datasource:
+    url: jdbc:postgresql://localhost:5432/smartshop_inventory
+    username: smartshop
+    password: smartshop_password
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2000ms
+  cache:
+    type: redis
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: inventory-service-group
+      auto-offset-reset: earliest
+      properties:
+        spring.json.trusted.packages: "com.smartshop.*"
+
+server:
+  port: 8084
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    preferIpAddress: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    sampling:
+      probability: 1.0
+
+logging:
+  level:
+    com.smartshop.inventory: DEBUG
+    org.springframework.data.redis: DEBUG
+    root: INFO

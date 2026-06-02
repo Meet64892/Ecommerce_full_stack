@@ -1,0 +1,58 @@
+# =============================================================================
+# notification-service/application.yml
+# =============================================================================
+spring:
+  application:
+    name: notification-service
+  config:
+    import: "optional:configserver:http://localhost:8888"
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: notification-service-group
+      auto-offset-reset: earliest
+      properties:
+        spring.json.trusted.packages: "com.smartshop.*"
+  mail:
+    host: smtp.mailtrap.io
+    port: 587
+    username: ${MAIL_USERNAME:placeholder}
+    password: ${MAIL_PASSWORD:placeholder}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+
+server:
+  port: 8085
+
+notification:
+  email:
+    from: noreply@smartshop.com
+    from-name: SmartShop Notifications
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    preferIpAddress: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    sampling:
+      probability: 1.0
+
+logging:
+  level:
+    com.smartshop.notification: DEBUG
+    root: INFO

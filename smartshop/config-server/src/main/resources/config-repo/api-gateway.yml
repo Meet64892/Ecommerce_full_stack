@@ -1,0 +1,29 @@
+# =============================================================================
+# config-repo/api-gateway.yml — Configuration for api-gateway
+# =============================================================================
+
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      # Global CORS configuration — applies to all routes
+      # CORS (Cross-Origin Resource Sharing): browser security mechanism that blocks
+      # requests from a different origin (domain/port) unless the server explicitly allows it.
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    com.smartshop.gateway: DEBUG

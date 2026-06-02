@@ -1,0 +1,65 @@
+# =============================================================================
+# config-repo/order-service.yml — Configuration for order-service
+# =============================================================================
+
+server:
+  port: 8083
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/smartshop_orders
+    username: smartshop
+    password: smartshop_password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      # Acks=all: producer waits for ALL in-sync replicas to acknowledge the write.
+      # This is the safest setting (no data loss) but has higher latency than acks=1 or acks=0.
+      acks: all
+      retries: 3
+      properties:
+        enable.idempotence: true   # Exactly-once semantics for the producer (no duplicate messages)
+
+    consumer:
+      group-id: order-service-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest   # Start from the beginning of the topic on first run
+
+# Resilience4j Circuit Breaker config
+resilience4j:
+  circuitbreaker:
+    instances:
+      inventoryService:
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50      # Open circuit when 50% of calls fail
+        waitDurationInOpenState: 10s  # Wait 10s before trying half-open
+        permittedNumberOfCallsInHalfOpenState: 3
+  retry:
+    instances:
+      inventoryService:
+        maxAttempts: 3
+        waitDuration: 500ms
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2   # 500ms, 1000ms, 2000ms
+
+logging:
+  level:
+    com.smartshop.order: DEBUG
+    org.springframework.kafka: INFO

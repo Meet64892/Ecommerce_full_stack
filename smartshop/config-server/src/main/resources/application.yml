@@ -1,0 +1,70 @@
+# =============================================================================
+# config-server/application.yml — Spring Cloud Config Server Configuration
+# =============================================================================
+
+server:
+  port: 8888   # Convention: Config Server always runs on 8888 (Spring Cloud default)
+
+spring:
+  application:
+    name: config-server   # Used for Eureka registration and log identification
+
+  profiles:
+    # "native" profile means: serve config from the local filesystem, NOT from Git.
+    # For production, replace with:
+    #   active: git
+    # and add spring.cloud.config.server.git.uri pointing to your Git repo.
+    # Native is perfect for development and educational purposes.
+    active: native
+
+  cloud:
+    config:
+      server:
+        native:
+          # The directory where config files are stored.
+          # Config resolution: a service named "user-service" with profile "dev"
+          # will look for files in this order:
+          #   1. user-service-dev.yml (most specific)
+          #   2. user-service.yml (application-specific defaults)
+          #   3. application-dev.yml (shared dev profile config)
+          #   4. application.yml (global defaults)
+          # This layered approach lets you share common config while allowing
+          # per-service and per-environment overrides.
+          search-locations: classpath:/config-repo/
+
+  # Basic security for the config server.
+  # In production, use OAuth2 or API keys. For development, basic auth is fine.
+  security:
+    user:
+      name: configuser
+      password: configpass
+
+# --- Eureka Client Config ---
+# Config server registers itself with Eureka so services can use:
+# spring.cloud.config.discovery.enabled=true and find it by name
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+    # Fetch registry so config-server can discover other services if needed
+    fetchRegistry: true
+    registerWithEureka: true
+  instance:
+    # Prefer IP address over hostname — required in Docker environments where
+    # hostnames may not resolve correctly between containers
+    preferIpAddress: true
+
+# --- Actuator ---
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,env,refresh
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    org.springframework.cloud.config: DEBUG
+    root: INFO
