@@ -1,0 +1,7 @@
+# Cloud/dev override: Bitnami public images moved to bitnamilegacy (2025+).
+# Use: docker compose up -d  (Compose merges this file automatically)
+services:
+  zookeeper:
+    image: bitnamilegacy/zookeeper:3.9.3-debian-12-r21
+  kafka:
+    image: bitnamilegacy/kafka:3.6

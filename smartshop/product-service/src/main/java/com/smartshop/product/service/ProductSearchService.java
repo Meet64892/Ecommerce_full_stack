@@ -4,7 +4,7 @@ import com.smartshop.product.dto.ProductDto;
 import com.smartshop.product.dto.ProductSearchRequest;
 import com.smartshop.product.entity.Product;
 import com.smartshop.product.mapper.ProductMapper;
-import com.smartshop.product.repository.ProductSearchRepository;
+import com.smartshop.product.repository.search.ProductSearchRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
