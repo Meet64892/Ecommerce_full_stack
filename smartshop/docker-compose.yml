@@ -1,0 +1,131 @@
+# =============================================================================
+# docker-compose.yml — All SmartShop infrastructure for local development
+# =============================================================================
+# Brings up every backing service the platform needs: PostgreSQL (one instance
+# hosting all per-service databases), Redis (cache), Elasticsearch (search),
+# Zookeeper + Kafka (event backbone), and Zipkin (distributed tracing UI).
+#
+# Run:  docker-compose up -d
+# Stop: docker-compose down            (add -v to also delete data volumes)
+#
+# NOTE: This file provisions INFRASTRUCTURE only. The Spring Boot services are
+# run separately with ./gradlew :service:bootRun so you can read logs and debug
+# each one — that is the intended learning workflow.
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL — relational source of truth for users/products/orders/inventory.
+  # A single instance hosts multiple databases, created by the init script so
+  # each service owns an isolated schema (logical separation without the cost of
+  # five separate containers in dev).
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: smartshop-postgres
+    environment:
+      # Superuser credentials used by every service in dev (override in prod!).
+      POSTGRES_USER: smartshop
+      POSTGRES_PASSWORD: smartshop
+      # The default DB; the init script creates the rest.
+      POSTGRES_DB: smartshop
+    ports:
+      - "5432:5432"
+    volumes:
+      # Persist data across restarts.
+      - postgres-data:/var/lib/postgresql/data
+      # Scripts in this dir run once on first init to create the other DBs.
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      # Compose waits for this to pass before dependents start.
+      test: ["CMD-SHELL", "pg_isready -U smartshop"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # Redis — in-memory cache for inventory reads (cache-aside, TTL eviction).
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: smartshop-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # Elasticsearch — full-text/faceted product search (single-node dev mode).
+  # ---------------------------------------------------------------------------
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
+    container_name: smartshop-elasticsearch
+    environment:
+      # Single-node discovery so it doesn't wait for a cluster.
+      - discovery.type=single-node
+      # Disable security (TLS/auth) in DEV ONLY for a frictionless setup.
+      - xpack.security.enabled=false
+      # Cap the JVM heap so ES fits comfortably on a laptop.
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200 >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  # ---------------------------------------------------------------------------
+  # Zookeeper — coordination service Kafka (in this image generation) relies on
+  # for broker metadata and controller election.
+  # ---------------------------------------------------------------------------
+  zookeeper:
+    image: bitnami/zookeeper:3.9
+    container_name: smartshop-zookeeper
+    environment:
+      # Allow unauthenticated local connections (dev convenience).
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+    ports:
+      - "2181:2181"
+
+  # ---------------------------------------------------------------------------
+  # Kafka — the event backbone for the order saga and notifications.
+  # ---------------------------------------------------------------------------
+  kafka:
+    image: bitnami/kafka:3.6
+    container_name: smartshop-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      # 9092 for host access; 29092 is the in-network listener for containers.
+      - "9092:9092"
+    environment:
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      # Two listeners: INTERNAL (between containers) and EXTERNAL (host -> kafka).
+      KAFKA_CFG_LISTENERS: INTERNAL://:29092,EXTERNAL://:9092
+      KAFKA_CFG_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:9092
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: INTERNAL
+      # Single broker in dev, so the default replication factor must be 1.
+      KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      # Let producers auto-create topics if a bean hasn't already (dev only).
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+  # ---------------------------------------------------------------------------
+  # Zipkin — collects and visualizes distributed traces (B3 propagation).
+  # Open http://localhost:9411 to follow a request across services.
+  # ---------------------------------------------------------------------------
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: smartshop-zipkin
+    ports:
+      - "9411:9411"
+
+# Named volume so PostgreSQL data survives `docker-compose down` (without -v).
+volumes:
+  postgres-data:
