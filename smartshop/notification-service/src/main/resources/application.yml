@@ -1,0 +1,66 @@
+# =============================================================================
+# notification-service application.yml — base config (Kafka consumer, no DB)
+# =============================================================================
+
+server:
+  port: 8085
+
+spring:
+  application:
+    name: notification-service
+  config:
+    import: "optional:configserver:http://localhost:8888"
+  # Thymeleaf: disable template caching in dev so edits show immediately.
+  thymeleaf:
+    cache: false
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
+    consumer:
+      group-id: notification-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+      properties:
+        spring.json.trusted.packages: "com.smartshop.*"
+        # Map the producer's logical type tokens to THIS service's event classes.
+        # The producer stamps a token (e.g. "orderConfirmed") in the header; here
+        # we resolve it to our local class so JSON deserializes cleanly across
+        # services without sharing an event jar.
+        spring.json.type.mapping: >-
+          orderConfirmed:com.smartshop.notification.event.OrderConfirmedEvent,
+          orderCancelled:com.smartshop.notification.event.OrderCancelledEvent,
+          userRegistered:com.smartshop.notification.event.UserRegisteredEvent
+
+# Notification behavior. real-delivery=false => mock (log) emails for the demo.
+smartshop:
+  notification:
+    real-delivery: ${MAIL_REAL_DELIVERY:false}
+    from-address: ${MAIL_FROM:no-reply@smartshop.dev}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URI:http://localhost:9411/api/v2/spans}
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

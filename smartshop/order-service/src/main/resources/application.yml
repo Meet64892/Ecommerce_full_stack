@@ -32,6 +32,15 @@ spring:
       # acks=all => wait for all in-sync replicas to ack before considering the
       # send successful (strongest durability; pairs with at-least-once).
       acks: all
+      properties:
+        # Stamp a stable LOGICAL token (not the FQCN) into each message's type
+        # header. Consumers in other services map the same token to THEIR local
+        # event class, so producer/consumer stay decoupled (no shared jar, no
+        # package-name coupling).
+        spring.json.type.mapping: >-
+          orderCreated:com.smartshop.order.event.OrderCreatedEvent,
+          orderConfirmed:com.smartshop.order.event.OrderConfirmedEvent,
+          orderCancelled:com.smartshop.order.event.OrderCancelledEvent
     consumer:
       # All instances of this service share one group so partitions are split
       # among them (scaling) while still seeing each message once per group.
@@ -43,8 +52,9 @@ spring:
       properties:
         # Trust our event packages for JSON deserialization (security guard).
         spring.json.trusted.packages: "com.smartshop.*"
-        # Map incoming JSON to this type when no __TypeId__ header is present.
-        spring.json.value.default.type: com.smartshop.order.event.InventoryCheckedEvent
+        # Resolve inventory's "inventoryChecked" token to our local class.
+        spring.json.type.mapping: >-
+          inventoryChecked:com.smartshop.order.event.InventoryCheckedEvent
 
 # Resilience4j retry used by the Kafka producer (@Retry name="kafkaPublish").
 resilience4j:

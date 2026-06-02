@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<!--
+  welcome.html — Thymeleaf welcome email sent on user.registered.
+  ${fullName} is injected by EmailTemplateService from the UserRegisteredEvent.
+-->
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Welcome to SmartShop</title>
+</head>
+<body style="font-family: Arial, sans-serif; color: #222;">
+    <h2 style="color:#1565c0;">Welcome to SmartShop!</h2>
+    <p>Hi <strong th:text="${fullName}">there</strong>,</p>
+    <p>
+        Thanks for creating your SmartShop account. You can now browse our
+        catalog, place orders, and track them in real time.
+    </p>
+    <p>Happy shopping!</p>
+    <hr/>
+    <p style="font-size: 12px; color: #888;">
+        This is an automated message from SmartShop. Please do not reply.
+    </p>
+</body>
+</html>

@@ -33,6 +33,11 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       acks: all
+      properties:
+        # Stamp the logical "inventoryChecked" token so order-service maps it
+        # back to its own InventoryCheckedEvent class.
+        spring.json.type.mapping: >-
+          inventoryChecked:com.smartshop.inventory.event.InventoryCheckedEvent
     consumer:
       group-id: inventory-service
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -40,8 +45,9 @@ spring:
       auto-offset-reset: earliest
       properties:
         spring.json.trusted.packages: "com.smartshop.*"
-        # Inbound order.created messages map to this local event type.
-        spring.json.value.default.type: com.smartshop.inventory.event.OrderCreatedEvent
+        # Resolve order-service's "orderCreated" token to our local class.
+        spring.json.type.mapping: >-
+          orderCreated:com.smartshop.inventory.event.OrderCreatedEvent
 
 # Cache TTL consumed by RedisConfig (also served by config-repo/inventory-service.yml).
 smartshop:

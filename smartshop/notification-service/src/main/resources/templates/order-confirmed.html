@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<!--
+  order-confirmed.html — Thymeleaf email template for order outcomes.
+  Reused for both confirmation and cancellation: the ${cancelled} flag toggles
+  the wording. Thymeleaf evaluates th:* attributes server-side, substituting the
+  model variables provided by EmailTemplateService.
+-->
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>SmartShop Order Update</title>
+</head>
+<body style="font-family: Arial, sans-serif; color: #222;">
+    <!-- Confirmation variant -->
+    <div th:unless="${cancelled}">
+        <h2 style="color:#2e7d32;">Your order is confirmed!</h2>
+        <p>Hi there,</p>
+        <p>
+            Great news — your SmartShop order
+            <strong th:text="'#' + ${orderId}">#0</strong>
+            has been confirmed and is being prepared.
+        </p>
+    </div>
+
+    <!-- Cancellation variant -->
+    <div th:if="${cancelled}">
+        <h2 style="color:#c62828;">Your order was cancelled</h2>
+        <p>Hi there,</p>
+        <p>
+            Unfortunately your SmartShop order
+            <strong th:text="'#' + ${orderId}">#0</strong>
+            could not be completed.
+        </p>
+        <p>Reason: <span th:text="${reason}">reason</span></p>
+    </div>
+
+    <hr/>
+    <p style="font-size: 12px; color: #888;">
+        This is an automated message from SmartShop. Please do not reply.
+    </p>
+</body>
+</html>

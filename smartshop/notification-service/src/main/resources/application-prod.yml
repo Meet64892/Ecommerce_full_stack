@@ -1,0 +1,21 @@
+# =============================================================================
+# notification-service application-prod.yml — PROD overrides
+# =============================================================================
+spring:
+  thymeleaf:
+    # Cache compiled templates in prod for performance.
+    cache: true
+  config:
+    import: "configserver:http://config-server:8888"
+  # A real SMTP server would be configured here (host/port/credentials).
+  mail:
+    host: ${MAIL_HOST:smtp.example.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+smartshop:
+  notification:
+    real-delivery: ${MAIL_REAL_DELIVERY:true}
+logging:
+  level:
+    com.smartshop: INFO

@@ -1,0 +1,10 @@
+# =============================================================================
+# notification-service application-dev.yml — DEV overrides
+# =============================================================================
+logging:
+  level:
+    com.smartshop: DEBUG
+smartshop:
+  notification:
+    # Always mock-send in dev so no SMTP server is needed.
+    real-delivery: false
