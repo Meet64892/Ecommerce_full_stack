@@ -1,0 +1,90 @@
+# Docker Compose starts the local infrastructure SmartShop needs for development.
+# Production would normally run these components through managed services or Kubernetes operators.
+version: "3.9"
+
+services:
+  # PostgreSQL stores relational state for user, product, order, and inventory services.
+  # A single container with multiple databases keeps local setup simple while preserving database-per-service boundaries.
+  postgres:
+    image: postgres:16-alpine
+    container_name: smartshop-postgres
+    environment:
+      # POSTGRES_USER creates the bootstrap superuser used by the init script.
+      POSTGRES_USER: smartshop
+      # POSTGRES_PASSWORD is intentionally simple because this compose file is for local development only.
+      POSTGRES_PASSWORD: smartshop
+      # POSTGRES_DB creates an initial database before our script adds service-specific databases.
+      POSTGRES_DB: smartshop
+    ports:
+      - "5432:5432"
+    volumes:
+      # The init script creates one database per bounded context so schemas do not bleed together.
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      # Named storage keeps local data across container restarts.
+      - postgres-data:/var/lib/postgresql/data
+
+  # Redis is an in-memory data store used by inventory caching and gateway rate limiting.
+  redis:
+    image: redis:7-alpine
+    container_name: smartshop-redis
+    ports:
+      - "6379:6379"
+
+  # Elasticsearch provides full-text product search; security is disabled for a frictionless local demo.
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
+    container_name: smartshop-elasticsearch
+    environment:
+      # discovery.type=single-node avoids cluster bootstrapping for local development.
+      discovery.type: single-node
+      # xpack.security.enabled=false removes credentials locally; do not disable this in production.
+      xpack.security.enabled: "false"
+      # ES_JAVA_OPTS caps heap usage so laptops and small cloud workspaces can run the stack.
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+
+  # Zookeeper coordinates Kafka brokers in this educational setup; newer Kafka can run without it, but many teams still encounter this deployment shape.
+  zookeeper:
+    image: bitnami/zookeeper:3.9
+    container_name: smartshop-zookeeper
+    environment:
+      # ALLOW_ANONYMOUS_LOGIN is acceptable only for local development.
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+    ports:
+      - "2181:2181"
+
+  # Kafka carries asynchronous domain events such as order creation and inventory replies.
+  kafka:
+    image: bitnami/kafka:3.6
+    container_name: smartshop-kafka
+    depends_on:
+      - zookeeper
+    environment:
+      # KAFKA_CFG_ZOOKEEPER_CONNECT tells the broker where its coordinator is running.
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      # KAFKA_CFG_LISTENERS declares internal and external listener names.
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
+      # KAFKA_CFG_ADVERTISED_LISTENERS tells clients which host/port to use from inside and outside Docker.
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      # KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP keeps both listeners unencrypted for local development.
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      # KAFKA_CFG_INTER_BROKER_LISTENER_NAME selects the Docker-internal listener for broker communication.
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      # ALLOW_PLAINTEXT_LISTENER is safe only on a developer machine.
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    ports:
+      - "29092:29092"
+
+  # Zipkin receives traces from Micrometer/Brave and displays service-to-service latency waterfalls.
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: smartshop-zipkin
+    ports:
+      - "9411:9411"
+
+volumes:
+  postgres-data:
+  elasticsearch-data:

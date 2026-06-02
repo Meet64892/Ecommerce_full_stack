@@ -1,0 +1,8 @@
+# Prod profile reads infrastructure endpoints from the deployment environment.
+spring:
+  datasource:
+    url: ${PRODUCT_DB_URL}
+    username: ${PRODUCT_DB_USERNAME}
+    password: ${PRODUCT_DB_PASSWORD}
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URIS}

@@ -1,0 +1,9 @@
+# Prod profile expects secrets and URLs from the environment instead of local defaults.
+spring:
+  datasource:
+    url: ${USER_DB_URL}
+    username: ${USER_DB_USERNAME}
+    password: ${USER_DB_PASSWORD}
+security:
+  jwt:
+    secret: ${JWT_SECRET}

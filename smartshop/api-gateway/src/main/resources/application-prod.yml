@@ -1,0 +1,4 @@
+# Production profile lowers gateway framework logging to reduce noise and storage cost.
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO

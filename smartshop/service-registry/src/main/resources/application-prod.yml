@@ -1,0 +1,5 @@
+# Production profile favors resilience during temporary network partitions.
+eureka:
+  server:
+    # Self-preservation reduces accidental mass eviction when clients cannot heartbeat briefly.
+    enable-self-preservation: true

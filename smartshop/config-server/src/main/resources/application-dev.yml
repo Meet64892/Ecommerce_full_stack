@@ -1,0 +1,4 @@
+# Dev profile keeps local native config enabled for easy experimentation.
+spring:
+  profiles:
+    active: native

@@ -1,0 +1,7 @@
+# A production server would normally switch search-locations to a Git repository or mounted secret volume.
+spring:
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: file:/etc/smartshop/config

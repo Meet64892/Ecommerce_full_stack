@@ -1,0 +1,111 @@
+# HTTP port for the public edge service.
+server:
+  port: 8080
+
+# Spring application and cloud gateway configuration.
+spring:
+  application:
+    name: api-gateway
+  config:
+    # Optional import is fail-safe locally; production may switch to fail-fast to prevent wrong defaults.
+    import: optional:configserver:http://localhost:8888
+  data:
+    redis:
+      # Redis host used by the RequestRateLimiter token bucket implementation.
+      host: localhost
+      # Redis port exposed by docker-compose.
+      port: 6379
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          # Discovery locator allows lb:// service ids discovered from Eureka.
+          enabled: true
+          # Lowercase service ids match the names used in this project.
+          lower-case-service-id: true
+      routes:
+        # User service route handles auth and user profile APIs.
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/auth/**,/users/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: userCircuitBreaker
+                fallbackUri: forward:/fallback/service
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 20
+                redis-rate-limiter.burstCapacity: 40
+                key-resolver: "#{@userKeyResolver}"
+        # Product service route handles catalog CRUD and search.
+        - id: product-service
+          uri: lb://product-service
+          predicates:
+            - Path=/products/**,/categories/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: productCircuitBreaker
+                fallbackUri: forward:/fallback/service
+        # Order service route handles checkout and order history.
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/orders/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: orderCircuitBreaker
+                fallbackUri: forward:/fallback/service
+        # Inventory service route exposes stock reads and reservations.
+        - id: inventory-service
+          uri: lb://inventory-service
+          predicates:
+            - Path=/inventory/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: inventoryCircuitBreaker
+                fallbackUri: forward:/fallback/service
+        # Notification service route is intentionally narrow because most communication is Kafka-driven.
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/notifications/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: notificationCircuitBreaker
+                fallbackUri: forward:/fallback/service
+
+# JWT verification configuration shared with user-service for HS256 demo tokens.
+security:
+  jwt:
+    # The secret must be at least 256 bits for HS256; production should load it from a secret manager.
+    secret: "smartshop-demo-secret-key-that-is-long-enough-for-hs256-signing"
+
+# Eureka tells the gateway where to discover service instances.
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+# Actuator and tracing configuration for health and Zipkin visibility.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+
+# Log pattern includes trace/span/correlation ids propagated through headers and MDC.
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-},%X{correlationId:-}]"
