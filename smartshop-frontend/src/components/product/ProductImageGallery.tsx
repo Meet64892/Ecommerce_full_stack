@@ -18,7 +18,7 @@ export function ProductImageGallery({ productName }: { productName: string }) {
   ];
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200">
+    <div className="card-interactive overflow-hidden">
       <ImageGallery items={images} showPlayButton={false} lazyLoad />
     </div>
   );

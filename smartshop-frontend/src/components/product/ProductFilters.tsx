@@ -14,17 +14,17 @@ export interface ProductFiltersProps {
 
 export function ProductFilters({ filters, categories, onChange }: ProductFiltersProps) {
   return (
-    <aside className="space-y-6 border border-neutral-800 bg-neutral-900 p-4 lg:sticky lg:top-24">
-      <h2 className="font-semibold text-white">Filters</h2>
+    <aside className="surface-card space-y-6 p-4 transition-shadow duration-300 hover:shadow-glow-sm lg:sticky lg:top-24">
+      <h2 className="font-semibold text-slate-100">Filters</h2>
 
       <div>
-        <label className="mb-1 block text-sm font-medium text-neutral-400">Category</label>
+        <label className="mb-1 block text-sm font-medium text-slate-400">Category</label>
         <select
           value={filters.categoryId ?? ''}
           onChange={(e) =>
             onChange({ ...filters, categoryId: e.target.value || undefined })
           }
-          className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-white"
+          className="input-glow w-full rounded-lg border border-slate-600/60 bg-surface-muted px-3 py-2 text-sm text-slate-100 transition-all duration-200 hover:border-slate-500 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25"
         >
           <option value="">All categories</option>
           {categories.map((c) => (
@@ -63,7 +63,7 @@ export function ProductFilters({ filters, categories, onChange }: ProductFilters
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium text-neutral-400">
+        <label className="mb-1 block text-sm font-medium text-slate-400">
           Min rating ({filters.minRating ?? 0})
         </label>
         <input
@@ -75,7 +75,7 @@ export function ProductFilters({ filters, categories, onChange }: ProductFilters
           onChange={(e) =>
             onChange({ ...filters, minRating: Number(e.target.value) || undefined })
           }
-          className="w-full accent-white"
+          className="w-full accent-primary-500"
         />
       </div>
     </aside>

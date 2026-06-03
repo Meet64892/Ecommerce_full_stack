@@ -13,15 +13,18 @@ export function CartItem({ item }: { item: CartItemType }) {
   const { product, quantity } = item;
 
   return (
-    <div className="flex gap-4 border-b border-gray-100 py-4">
-      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-xl font-bold text-primary-400">
+    <div className="group flex gap-4 border-b border-slate-700/40 py-4 transition-colors duration-200 hover:bg-surface-hover/30">
+      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border border-primary-500/30 bg-primary-600/10 text-xl font-bold text-primary-300 transition-all duration-200 group-hover:border-primary-400/50 group-hover:shadow-glow-sm">
         {product.name.charAt(0)}
       </div>
       <div className="min-w-0 flex-1">
-        <Link to={`/products/${product.id}`} className="font-medium text-gray-900 hover:text-primary-600">
+        <Link
+          to={`/products/${product.id}`}
+          className="font-medium text-slate-100 transition-colors hover:text-primary-300"
+        >
           {product.name}
         </Link>
-        <p className="text-sm text-gray-500">{formatCurrency(product.price)} each</p>
+        <p className="text-sm text-slate-500">{formatCurrency(product.price)} each</p>
         <div className="mt-2 flex items-center gap-2">
           <Button
             size="sm"
@@ -31,7 +34,7 @@ export function CartItem({ item }: { item: CartItemType }) {
           >
             −
           </Button>
-          <span className="w-8 text-center text-sm">{quantity}</span>
+          <span className="w-8 text-center text-sm text-slate-300">{quantity}</span>
           <Button
             size="sm"
             variant="secondary"
@@ -45,7 +48,7 @@ export function CartItem({ item }: { item: CartItemType }) {
           </Button>
         </div>
       </div>
-      <p className="font-semibold text-gray-900">{formatCurrency(product.price * quantity)}</p>
+      <p className="font-semibold text-slate-100">{formatCurrency(product.price * quantity)}</p>
     </div>
   );
 }

@@ -16,9 +16,9 @@ export default function LoginPage() {
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mx-auto max-w-md border border-neutral-800 bg-neutral-900 p-8"
+      className="surface-card mx-auto max-w-md p-8 shadow-card-hover transition-shadow duration-300 hover:shadow-glow-sm"
     >
-      <h1 className="mb-6 text-center text-2xl font-bold text-white">Sign in</h1>
+      <h1 className="mb-6 text-center font-display text-2xl font-bold gradient-text">Sign in</h1>
       <LoginForm onSuccess={() => navigate(from, { replace: true })} />
     </motion.div>
   );

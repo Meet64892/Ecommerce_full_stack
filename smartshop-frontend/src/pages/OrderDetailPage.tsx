@@ -26,8 +26,8 @@ export default function OrderDetailPage() {
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold">Order #{order.id.slice(0, 8)}</h1>
-        <p className="text-sm text-gray-500">
+        <h1 className="font-display text-2xl font-bold text-slate-100">Order #{order.id.slice(0, 8)}</h1>
+        <p className="text-sm text-slate-500">
           {formatOrderStatus(order.status)} · {formatRelativeTime(order.createdAt)}
         </p>
       </div>

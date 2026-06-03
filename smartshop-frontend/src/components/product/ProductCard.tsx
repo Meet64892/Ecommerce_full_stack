@@ -18,7 +18,7 @@ export interface ProductCardProps {
 }
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 24 },
   show: { opacity: 1, y: 0 },
 };
 
@@ -37,28 +37,38 @@ function ProductCardComponent({ product, onAddToCart }: ProductCardProps) {
   return (
     <motion.article
       variants={itemVariants}
-      className="group flex flex-col overflow-hidden rounded-none border border-neutral-800 bg-neutral-900 transition-colors hover:border-neutral-600 hover:bg-neutral-900/80"
+      whileHover={{ y: -4 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+      className="group card-interactive flex flex-col overflow-hidden"
     >
       <Link to={`/products/${product.id}`} className="block p-5">
-        <div className="mb-4 flex aspect-square items-center justify-center border border-neutral-800 bg-neutral-950 text-5xl font-bold text-neutral-600">
-          {product.name.charAt(0)}
+        <div className="relative mb-4 flex aspect-square items-center justify-center overflow-hidden rounded-lg border border-slate-700/50 bg-surface-muted">
+          <div
+            className="absolute inset-0 bg-gradient-accent opacity-0 transition-opacity duration-300 group-hover:opacity-10"
+            aria-hidden
+          />
+          <span className="relative text-5xl font-bold text-primary-400/80 transition-all duration-300 group-hover:scale-110 group-hover:text-primary-300">
+            {product.name.charAt(0)}
+          </span>
         </div>
-        <h3 className="font-semibold text-white group-hover:text-neutral-200">{product.name}</h3>
-        <p className="mt-1 text-sm text-neutral-500">{truncate(product.description, 80)}</p>
-        <div className="mt-2 flex items-center gap-1 text-sm text-neutral-300">
-          <Star className="h-4 w-4 fill-white text-white" />
+        <h3 className="font-semibold text-slate-100 transition-colors duration-200 group-hover:text-primary-300">
+          {product.name}
+        </h3>
+        <p className="mt-1 text-sm text-slate-500">{truncate(product.description, 80)}</p>
+        <div className="mt-2 flex items-center gap-1 text-sm text-slate-400">
+          <Star className="h-4 w-4 fill-amber-400 text-amber-400 transition-transform duration-200 group-hover:scale-110" />
           <span>{product.rating.toFixed(1)}</span>
-          <span className="text-neutral-600">· {product.categoryName}</span>
+          <span className="text-slate-600">· {product.categoryName}</span>
         </div>
-        <p className="mt-3 text-xl font-bold text-white">{formatCurrency(product.price)}</p>
+        <p className="mt-3 text-xl font-bold gradient-text">{formatCurrency(product.price)}</p>
       </Link>
-      <div className="mt-auto border-t border-neutral-800 p-4">
+      <div className="mt-auto border-t border-slate-700/50 p-4">
         <Button
           className="w-full"
           variant={isInCart(product.id) ? 'secondary' : 'primary'}
           onClick={handleAdd}
         >
-          <ShoppingCart className="h-4 w-4" />
+          <ShoppingCart className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
           {isInCart(product.id) ? 'In cart' : 'Add to cart'}
         </Button>
       </div>
@@ -68,8 +78,8 @@ function ProductCardComponent({ product, onAddToCart }: ProductCardProps) {
 
 function ProductCardSkeleton() {
   return (
-    <div className="border border-neutral-800 bg-neutral-900 p-5">
-      <Skeleton className="mb-4 aspect-square w-full rounded-none" />
+    <div className="surface-card p-5">
+      <Skeleton className="mb-4 aspect-square w-full rounded-lg" />
       <Skeleton className="mb-2 h-5 w-3/4" />
       <Skeleton.Text lines={2} />
       <Skeleton className="mt-4 h-10 w-full rounded-lg" />

@@ -52,7 +52,17 @@ createRoot(rootElement).render(
       {import.meta.env.VITE_ENABLE_DEVTOOLS === 'true' && (
         <ReactQueryDevtools initialIsOpen={false} />
       )}
-      <Toaster position="top-right" />
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: '#1a1f2e',
+            color: '#f1f5f9',
+            border: '1px solid rgba(139, 92, 246, 0.35)',
+            boxShadow: '0 0 20px -4px rgba(139, 92, 246, 0.35)',
+          },
+        }}
+      />
     </QueryClientProvider>
   </StrictMode>,
 );

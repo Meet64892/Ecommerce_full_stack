@@ -83,12 +83,12 @@ export default function ProductDetailPage() {
           <ProductImageGallery productName={product.name} />
         </ErrorBoundary>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
-          <p className="mt-2 text-2xl font-semibold text-primary-600">
+          <h1 className="font-display text-3xl font-bold text-slate-100">{product.name}</h1>
+          <p className="mt-2 text-2xl font-semibold gradient-text">
             {formatCurrency(product.price)}
           </p>
-          <p className="mt-4 text-gray-600">{product.description}</p>
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-4 text-slate-400">{product.description}</p>
+          <p className="mt-2 text-sm text-slate-500">
             SKU: {product.stockKeepingUnit} · {product.categoryName}
           </p>
           {inventory && (

@@ -147,8 +147,8 @@ export default function ProductListPage() {
                 </Button>
               </div>
             ) : products.length === 0 ? (
-              <div className="flex flex-col items-center py-16 text-gray-500">
-                <PackageOpen className="mb-4 h-16 w-16 text-gray-300" />
+              <div className="flex flex-col items-center py-16 text-slate-500">
+                <PackageOpen className="mb-4 h-16 w-16 text-slate-600 transition-transform duration-300 hover:scale-105" />
                 <p>No products match your filters.</p>
               </div>
             ) : (
