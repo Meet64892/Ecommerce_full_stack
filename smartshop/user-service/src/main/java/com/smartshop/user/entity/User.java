@@ -70,6 +70,9 @@ public class User {
     @Column(nullable = false)
     private boolean enabled = true;
 
+    @Column(name = "brand_id")
+    private UUID brandId;
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private Instant createdAt;

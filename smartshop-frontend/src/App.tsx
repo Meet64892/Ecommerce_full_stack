@@ -34,7 +34,13 @@ const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage'));
+const AdminDashboardHome = lazy(() => import('./pages/admin/AdminDashboardHome'));
+const AdminBrandsPage = lazy(() => import('./pages/admin/AdminBrandsPage'));
+const AdminProductsPage = lazy(() => import('./pages/admin/AdminProductsPage'));
+const AdminUsersPage = lazy(() => import('./pages/admin/AdminUsersPage'));
 const BrandProductsPage = lazy(() => import('./pages/BrandProductsPage'));
+const VendorApplyPage = lazy(() => import('./pages/VendorApplyPage'));
+const VendorDashboardPage = lazy(() => import('./pages/VendorDashboardPage'));
 
 function PageFallback() {
   return (
@@ -93,6 +99,27 @@ export default function App() {
               <RoleProtectedRoute allowedRoles={['SUPER_ADMIN']}>
                 <AdminDashboardPage />
               </RoleProtectedRoute>
+            }
+          >
+            <Route index element={<AdminDashboardHome />} />
+            <Route path="brands" element={<AdminBrandsPage />} />
+            <Route path="products" element={<AdminProductsPage />} />
+            <Route path="users" element={<AdminUsersPage />} />
+          </Route>
+          <Route
+            path={ROUTES.VENDOR}
+            element={
+              <RoleProtectedRoute allowedRoles={['SUPER_USER', 'SUPER_ADMIN']}>
+                <VendorDashboardPage />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path={ROUTES.VENDOR_APPLY}
+            element={
+              <ProtectedRoute>
+                <VendorApplyPage />
+              </ProtectedRoute>
             }
           />
           <Route

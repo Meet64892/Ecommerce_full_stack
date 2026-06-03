@@ -22,6 +22,16 @@ import java.util.UUID;
  * @see com.smartshop.product.mapper.ProductMapper
  * @author SmartShop Team
  */
-public record ProductDto(UUID id, String name, String description, BigDecimal price, String stockKeepingUnit,
-                         double rating, UUID categoryId, String categoryName) {
+public record ProductDto(
+        UUID id,
+        String name,
+        String description,
+        BigDecimal price,
+        String stockKeepingUnit,
+        double rating,
+        UUID categoryId,
+        String categoryName,
+        UUID brandId,
+        String approvalStatus
+) {
 }

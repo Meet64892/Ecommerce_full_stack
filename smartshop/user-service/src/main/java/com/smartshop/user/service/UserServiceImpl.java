@@ -171,7 +171,7 @@ public class UserServiceImpl implements UserService {
      * @return auth response with bearer token type and expiry
      */
     private AuthResponse authResponse(User user) {
-        String token = jwtService.generateToken(user.getEmail(), user.getRole().name());
+        String token = jwtService.generateToken(user.getEmail(), user.getRole().name(), user.getId(), user.getBrandId());
         return new AuthResponse(token, "Bearer", jwtService.expirationSeconds(), userMapper.toDto(user));
     }
 }

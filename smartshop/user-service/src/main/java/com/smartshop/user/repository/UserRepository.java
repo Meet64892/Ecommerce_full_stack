@@ -1,5 +1,6 @@
 package com.smartshop.user.repository;
 
+import com.smartshop.user.entity.Role;
 import com.smartshop.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -43,4 +44,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
      * @return true when a row already uses the email
      */
     boolean existsByEmail(String email);
+
+    long countByRole(Role role);
 }

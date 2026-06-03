@@ -19,6 +19,8 @@ export interface Product {
   rating: number;
   categoryId: string;
   categoryName: string;
+  brandId?: string;
+  approvalStatus?: string;
 }
 
 export interface Category {
@@ -60,5 +62,6 @@ export interface User {
   lastName: string;
   fullName: string;
   role: UserRole;
+  brandId?: string;
   createdAt: string;
 }

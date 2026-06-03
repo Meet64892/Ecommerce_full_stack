@@ -12,7 +12,9 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * JwtService - Creates and validates JSON Web Tokens for authenticated users.
@@ -58,14 +60,33 @@ public class JwtService {
      * @return compact signed JWT string
      */
     public String generateToken(String email, String role) {
+        return generateToken(email, role, null, null);
+    }
+
+    /**
+     * Generates a JWT with marketplace identity claims for gateway propagation.
+     */
+    public String generateToken(String email, String role, UUID userId, UUID brandId) {
         Instant now = Instant.now();
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", role);
+        if (userId != null) {
+            claims.put("userId", userId.toString());
+        }
+        if (brandId != null) {
+            claims.put("brandId", brandId.toString());
+        }
         return Jwts.builder()
                 .subject(email)
-                .claims(Map.of("role", role))
+                .claims(claims)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plus(expiration)))
                 .signWith(key)
                 .compact();
+    }
+
+    public String extractRole(String token) {
+        return parseClaims(token).get("role", String.class);
     }
 
     /**

@@ -82,4 +82,12 @@ public interface ProductService {
      * @return category DTOs
      */
     java.util.List<CategoryDto> categories();
+
+    Page<ProductDto> listPending(Pageable pageable);
+
+    ProductDto approve(UUID id);
+
+    ProductDto reject(UUID id);
+
+    Page<ProductDto> listForCurrentVendor(Pageable pageable);
 }

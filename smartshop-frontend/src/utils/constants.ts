@@ -25,7 +25,12 @@ export const ROUTES = {
   LOGIN: '/login',
   REGISTER: '/register',
   ADMIN: '/admin',
+  ADMIN_BRANDS: '/admin/brands',
+  ADMIN_PRODUCTS: '/admin/products',
+  ADMIN_USERS: '/admin/users',
   BRAND: '/brand/products',
+  VENDOR: '/vendor',
+  VENDOR_APPLY: '/vendor/apply',
 } as const;
 
 export const ORDER_STATUS: OrderStatus[] = [

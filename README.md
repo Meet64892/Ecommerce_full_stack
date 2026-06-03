@@ -1,5 +1,6 @@
 # SmartShop
 
-Microservices e-commerce backend (`smartshop/`) and educational React frontend (`smartshop-frontend/`).
+Multi-vendor marketplace: Spring Boot microservices (`smartshop/`) and React storefront (`smartshop-frontend/`).
 
-See each folder's README for setup instructions.
+- **Setup:** see each folder's README.
+- **Roles & workflows (Super Admin / Vendor / Customer):** [MARKETPLACE_ROLES.md](MARKETPLACE_ROLES.md)

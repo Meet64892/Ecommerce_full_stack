@@ -8,6 +8,7 @@ import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
@@ -60,7 +61,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
-        if (PUBLIC_PATH_PREFIXES.stream().anyMatch(path::startsWith)) {
+        if (isPublic(path, exchange.getRequest().getMethod())) {
             return chain.filter(exchange);
         }
         String authorization = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
@@ -87,5 +88,15 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     @Override
     public int getOrder() {
         return -100;
+    }
+
+    private boolean isPublic(String path, HttpMethod method) {
+        if (PUBLIC_PATH_PREFIXES.stream().anyMatch(path::startsWith)) {
+            return true;
+        }
+        if (method != HttpMethod.GET) {
+            return false;
+        }
+        return path.startsWith("/products") || path.startsWith("/categories") || path.startsWith("/brands");
     }
 }
