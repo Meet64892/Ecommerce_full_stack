@@ -1,8 +1,5 @@
 /**
  * Header.tsx — Top navigation, cart badge, user menu
- *
- * CONNECTED TO:
- * - cartStore, useAuth, useLocation, @headlessui/react Menu
  */
 
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
@@ -32,21 +29,21 @@ export function Header() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-gray-200 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-40 w-full border-b border-neutral-800 bg-neutral-950/95 backdrop-blur">
+      <div className="flex h-16 w-full items-center justify-between gap-4 px-4 sm:px-6">
         <div className="flex items-center gap-3">
           <button
             type="button"
-            className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 lg:hidden"
+            className="rounded-lg p-2 text-neutral-400 hover:bg-neutral-900 hover:text-white lg:hidden"
             onClick={toggleSidebar}
             aria-label="Open menu"
           >
             <MenuIcon className="h-6 w-6" />
           </button>
-          <Link to={ROUTES.HOME} className="flex items-center gap-2 font-bold text-primary-600">
+          <Link to={ROUTES.HOME} className="flex items-center gap-2 font-bold tracking-tight text-white">
             <svg className="h-8 w-8" viewBox="0 0 32 32" aria-hidden>
-              <rect width="32" height="32" rx="8" fill="#2563eb" />
-              <path d="M8 12h16l-2 14H10L8 12z" fill="#fff" />
+              <rect width="32" height="32" rx="8" fill="#ffffff" />
+              <path d="M8 12h16l-2 14H10L8 12z" fill="#0a0a0a" />
             </svg>
             <span className="hidden sm:inline">SmartShop</span>
           </Link>
@@ -60,17 +57,17 @@ export function Header() {
               <NavLink
                 key={link.to}
                 to={link.to}
-                className="relative px-3 py-2 text-sm font-medium text-gray-600 hover:text-primary-600"
+                className="relative px-3 py-2 text-sm font-medium text-neutral-400 hover:text-white"
               >
                 {link.label}
                 {isActive && !shouldReduceMotion && (
                   <motion.span
                     layoutId="nav-underline"
-                    className="absolute inset-x-1 -bottom-0.5 h-0.5 rounded bg-primary-600"
+                    className="absolute inset-x-1 -bottom-0.5 h-0.5 rounded bg-white"
                   />
                 )}
                 {isActive && shouldReduceMotion && (
-                  <span className="absolute inset-x-1 -bottom-0.5 h-0.5 rounded bg-primary-600" />
+                  <span className="absolute inset-x-1 -bottom-0.5 h-0.5 rounded bg-white" />
                 )}
               </NavLink>
             );
@@ -81,7 +78,7 @@ export function Header() {
           <button
             type="button"
             onClick={() => setCartDrawerOpen(true)}
-            className="relative rounded-lg p-2 text-gray-600 hover:bg-gray-100"
+            className="relative rounded-lg p-2 text-neutral-400 hover:bg-neutral-900 hover:text-white"
             aria-label="Open cart"
           >
             <ShoppingCart className="h-6 w-6" />
@@ -94,21 +91,21 @@ export function Header() {
 
           {isAuthenticated ? (
             <Menu as="div" className="relative">
-              <MenuButton className="flex items-center gap-2 rounded-lg p-2 hover:bg-gray-100">
-                <User className="h-5 w-5 text-gray-600" />
-                <span className="hidden text-sm font-medium sm:inline">{user?.firstName}</span>
+              <MenuButton className="flex items-center gap-2 rounded-lg p-2 hover:bg-neutral-900">
+                <User className="h-5 w-5 text-neutral-400" />
+                <span className="hidden text-sm font-medium text-white sm:inline">{user?.firstName}</span>
               </MenuButton>
               <MenuItems
                 className={cn(
-                  'absolute right-0 mt-2 w-48 origin-top-right rounded-lg border border-gray-100',
-                  'bg-white py-1 shadow-lg focus:outline-none',
+                  'absolute right-0 mt-2 w-48 origin-top-right rounded-lg border border-neutral-800',
+                  'bg-neutral-900 py-1 shadow-xl focus:outline-none',
                 )}
               >
                 <MenuItem>
                   {({ focus }) => (
                     <button
                       type="button"
-                      className={cn('block w-full px-4 py-2 text-left text-sm', focus && 'bg-gray-50')}
+                      className={cn('block w-full px-4 py-2 text-left text-sm text-neutral-200', focus && 'bg-neutral-800')}
                       onClick={() => navigate(ROUTES.PROFILE)}
                     >
                       My Profile
@@ -119,7 +116,7 @@ export function Header() {
                   {({ focus }) => (
                     <button
                       type="button"
-                      className={cn('block w-full px-4 py-2 text-left text-sm', focus && 'bg-gray-50')}
+                      className={cn('block w-full px-4 py-2 text-left text-sm text-neutral-200', focus && 'bg-neutral-800')}
                       onClick={() => navigate(ROUTES.ORDERS)}
                     >
                       My Orders
@@ -130,7 +127,7 @@ export function Header() {
                   {({ focus }) => (
                     <button
                       type="button"
-                      className={cn('block w-full px-4 py-2 text-left text-sm text-red-600', focus && 'bg-red-50')}
+                      className={cn('block w-full px-4 py-2 text-left text-sm text-red-400', focus && 'bg-red-950/50')}
                       onClick={() => {
                         logout();
                         navigate(ROUTES.LOGIN);
@@ -145,7 +142,7 @@ export function Header() {
           ) : (
             <Link
               to={ROUTES.LOGIN}
-              className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
+              className="rounded-lg border border-white bg-white px-4 py-2 text-sm font-medium text-neutral-950 hover:bg-neutral-200"
             >
               Sign in
             </Link>

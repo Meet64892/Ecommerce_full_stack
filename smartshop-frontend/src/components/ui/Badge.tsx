@@ -10,10 +10,10 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 const variants = {
-  primary: 'bg-primary-100 text-primary-800',
-  gray: 'bg-gray-100 text-gray-800',
-  success: 'bg-green-100 text-green-800',
-  warning: 'bg-amber-100 text-amber-800',
+  primary: 'bg-white text-neutral-950',
+  gray: 'bg-neutral-800 text-neutral-200',
+  success: 'bg-neutral-200 text-neutral-950',
+  warning: 'bg-neutral-600 text-white',
 };
 
 export function Badge({ className, variant = 'primary', children, ...props }: BadgeProps) {

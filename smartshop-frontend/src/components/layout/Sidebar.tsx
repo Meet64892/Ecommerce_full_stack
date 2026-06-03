@@ -51,10 +51,10 @@ export function Sidebar() {
               <Link to={ROUTES.HOME} onClick={() => setOpen(false)} className="text-lg font-medium">
                 Home
               </Link>
-              <Link to={ROUTES.PRODUCTS} onClick={() => setOpen(false)} className="text-lg font-medium">
+              <Link to={ROUTES.PRODUCTS} onClick={() => setOpen(false)} className="text-lg font-medium text-white">
                 Shop
               </Link>
-              <Link to={ROUTES.CART} onClick={() => setOpen(false)} className="text-lg font-medium">
+              <Link to={ROUTES.CART} onClick={() => setOpen(false)} className="text-lg font-medium text-white">
                 Cart
               </Link>
             </nav>

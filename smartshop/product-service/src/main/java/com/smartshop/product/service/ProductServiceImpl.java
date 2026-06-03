@@ -78,6 +78,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = new Product(request.name(), request.description(), request.price(), request.stockKeepingUnit(), category);
         Product saved = productRepository.save(product);
         // The search index is updated after the database save so the indexed document has the generated id.
+        ProductIndexingSupport.prepareForIndexing(saved);
         productSearchRepository.save(saved);
         return productMapper.toDto(saved);
     }
