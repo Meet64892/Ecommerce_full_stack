@@ -87,7 +87,7 @@ public class UserServiceImpl implements UserService {
             throw new EmailAlreadyExistsException(normalizedEmail);
         }
         // We hash the password before constructing the entity so raw credentials never enter persistence objects.
-        User user = new User(normalizedEmail, passwordEncoder.encode(request.password()), request.firstName(), request.lastName(), Role.CUSTOMER);
+        User user = new User(normalizedEmail, passwordEncoder.encode(request.password()), request.firstName(), request.lastName(), Role.USER);
         User saved = userRepository.save(user);
         userEventProducer.publishRegistered(new UserRegisteredEvent(saved.getId(), saved.getEmail(), saved.getFirstName()));
         return authResponse(saved);

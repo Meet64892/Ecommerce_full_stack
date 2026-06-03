@@ -11,13 +11,8 @@ import { useAuth } from '@hooks/useAuth';
 import { useUiStore } from '@store/uiStore';
 import { Badge } from '@components/ui/Badge';
 import { ROUTES } from '@utils/constants';
+import { canManageProducts, isSuperAdmin } from '@utils/roles';
 import { cn } from '@utils/cn';
-
-const navLinks = [
-  { to: ROUTES.HOME, label: 'Home' },
-  { to: ROUTES.PRODUCTS, label: 'Shop' },
-  { to: ROUTES.ORDERS, label: 'Orders', protected: true },
-];
 
 export function Header() {
   const { totalItems } = useCart();
@@ -27,6 +22,18 @@ export function Header() {
   const setCartDrawerOpen = useUiStore((s) => s.setCartDrawerOpen);
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
   const shouldReduceMotion = useReducedMotion();
+
+  const navLinks = [
+    { to: ROUTES.HOME, label: 'Home' },
+    { to: ROUTES.PRODUCTS, label: 'Shop' },
+    { to: ROUTES.ORDERS, label: 'Orders', protected: true },
+    ...(isAuthenticated && canManageProducts(user?.role)
+      ? [{ to: ROUTES.BRAND, label: 'My products', protected: true as const }]
+      : []),
+    ...(isAuthenticated && isSuperAdmin(user?.role)
+      ? [{ to: ROUTES.ADMIN, label: 'Admin', protected: true as const }]
+      : []),
+  ];
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-700/50 glass-panel">
@@ -113,6 +120,38 @@ export function Header() {
                   'glass-panel py-1 shadow-card-hover focus:outline-none animate-slide-down',
                 )}
               >
+                {canManageProducts(user?.role) && (
+                  <MenuItem>
+                    {({ focus }) => (
+                      <button
+                        type="button"
+                        className={cn(
+                          'block w-full px-4 py-2 text-left text-sm text-slate-200 transition-colors',
+                          focus && 'bg-primary-600/20 text-white',
+                        )}
+                        onClick={() => navigate(ROUTES.BRAND)}
+                      >
+                        My products
+                      </button>
+                    )}
+                  </MenuItem>
+                )}
+                {isSuperAdmin(user?.role) && (
+                  <MenuItem>
+                    {({ focus }) => (
+                      <button
+                        type="button"
+                        className={cn(
+                          'block w-full px-4 py-2 text-left text-sm text-slate-200 transition-colors',
+                          focus && 'bg-primary-600/20 text-white',
+                        )}
+                        onClick={() => navigate(ROUTES.ADMIN)}
+                      >
+                        Admin dashboard
+                      </button>
+                    )}
+                  </MenuItem>
+                )}
                 <MenuItem>
                   {({ focus }) => (
                     <button

@@ -9,8 +9,10 @@ import { useAuth } from '@hooks/useAuth';
 import { userApi } from '@api/userApi';
 import { Input } from '@components/ui/Input';
 import { Button } from '@components/ui/Button';
+import { Badge } from '@components/ui/Badge';
 import toast from 'react-hot-toast';
 import { parseApiError } from '@utils/errorHandler';
+import { ROLE_LABELS } from '@utils/roles';
 
 export default function ProfilePage() {
   const { user, refreshUser } = useAuth();
@@ -44,7 +46,8 @@ export default function ProfilePage() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-lg">
-      <h1 className="mb-6 font-display text-2xl font-bold gradient-text">My profile</h1>
+      <h1 className="mb-2 font-display text-2xl font-bold gradient-text">My profile</h1>
+      {profile?.role && <Badge className="mb-6">{ROLE_LABELS[profile.role]}</Badge>}
       <form
         onSubmit={handleSubmit((data) => updateMutation.mutate(data))}
         className="surface-card space-y-4 p-6 transition-shadow duration-300 hover:shadow-glow-sm"

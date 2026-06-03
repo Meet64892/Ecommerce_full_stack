@@ -24,6 +24,8 @@ export const ROUTES = {
   PROFILE: '/profile',
   LOGIN: '/login',
   REGISTER: '/register',
+  ADMIN: '/admin',
+  BRAND: '/brand/products',
 } as const;
 
 export const ORDER_STATUS: OrderStatus[] = [
