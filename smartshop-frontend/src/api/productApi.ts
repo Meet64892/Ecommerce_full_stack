@@ -90,4 +90,15 @@ export const productApi = {
     const { data } = await axiosInstance.get<ApiResponse<Category[]>>('/categories');
     return data.data;
   },
+
+  async create(payload: {
+    name: string;
+    description: string;
+    price: number;
+    stockKeepingUnit: string;
+    categoryId: string;
+  }): Promise<Product> {
+    const { data } = await axiosInstance.post<ApiResponse<Product>>('/products', payload);
+    return data.data;
+  },
 };

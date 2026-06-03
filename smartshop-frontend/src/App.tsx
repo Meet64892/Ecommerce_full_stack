@@ -18,6 +18,7 @@ import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Layout } from '@components/layout/Layout';
 import { ProtectedRoute } from '@components/auth/ProtectedRoute';
+import { RoleProtectedRoute } from '@components/auth/RoleProtectedRoute';
 import { Skeleton } from '@components/ui/Skeleton';
 import { ROUTES } from '@utils/constants';
 
@@ -32,6 +33,8 @@ const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage'));
+const BrandProductsPage = lazy(() => import('./pages/BrandProductsPage'));
 
 function PageFallback() {
   return (
@@ -82,6 +85,22 @@ export default function App() {
               <ProtectedRoute>
                 <ProfilePage />
               </ProtectedRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN}
+            element={
+              <RoleProtectedRoute allowedRoles={['SUPER_ADMIN']}>
+                <AdminDashboardPage />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path={ROUTES.BRAND}
+            element={
+              <RoleProtectedRoute allowedRoles={['SUPER_USER', 'SUPER_ADMIN']}>
+                <BrandProductsPage />
+              </RoleProtectedRoute>
             }
           />
           <Route path={ROUTES.LOGIN} element={<LoginPage />} />

@@ -1,15 +1,13 @@
 /**
- * ProductSearch.tsx — Debounced search with recent history and Ctrl+K
+ * ProductSearch.tsx — Debounced search with recent history (dropdown on focus only)
  */
 
-import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Search, X } from 'lucide-react';
 import { useDebounce } from '@hooks/useDebounce';
 import { useLocalStorage } from '@hooks/useLocalStorage';
+import { useClickOutside } from '@hooks/useClickOutside';
 import { cn } from '@utils/cn';
-
-import { useCallback } from 'react';
-
 
 export interface ProductSearchProps {
   value: string;
@@ -19,56 +17,42 @@ export interface ProductSearchProps {
 
 export const ProductSearch = forwardRef<HTMLInputElement, ProductSearchProps>(
   function ProductSearch({ value, onChange, isSearching }, ref) {
+    const containerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const [focused, setFocused] = useState(false);
     useImperativeHandle(ref, () => inputRef.current as HTMLInputElement);
 
     const [recent, setRecent] = useLocalStorage<string[]>('smartshop-recent-searches', []);
     const debounced = useDebounce(value, 400);
 
-
-// Create a stable wrapper for setRecent
-const saveRecentSearch = useCallback((searchTerm: string) => {
-  if (!searchTerm.trim()) return;
-  
-  setRecent((prev) => {
-    const next = [searchTerm, ...prev.filter((s) => s !== searchTerm)].slice(0, 5);
-    return next;
-  });
-}, [setRecent]); // This dependency is still problematic but less likely to cause loops
-
-useEffect(() => {
-  if (!debounced.trim()) return;
-  saveRecentSearch(debounced);
-}, [debounced, saveRecentSearch]);
+    const saveRecentSearch = useCallback(
+      (searchTerm: string) => {
+        if (!searchTerm.trim()) return;
+        setRecent((prev) => [searchTerm, ...prev.filter((s) => s !== searchTerm)].slice(0, 5));
+      },
+      [setRecent],
+    );
 
     useEffect(() => {
       if (!debounced.trim()) return;
-      setRecent((prev) => {
-        const next = [debounced, ...prev.filter((s) => s !== debounced)].slice(0, 5);
-        return next;
-      });
-    }, [debounced, setRecent]);
+      saveRecentSearch(debounced);
+    }, [debounced, saveRecentSearch]);
 
-    // useEffect(() => {
-    //   const onKeyDown = (e: KeyboardEvent) => {
-    //     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-    //       e.preventDefault();
-    //       inputRef.current?.focus();
-    //     }
-    //   };
-    //   window.addEventListener('keydown', onKeyDown);
-    //   return () => window.removeEventListener('keydown', onKeyDown);
-    // }, []);
+    const closeDropdown = useCallback(() => setFocused(false), []);
+    useClickOutside(containerRef, closeDropdown);
+
+    const showRecent = focused && recent.length > 0 && !value;
 
     return (
-      <div className="relative w-full">
+      <div ref={containerRef} className="relative w-full">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
         <input
           ref={inputRef}
           type="search"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="Search products… (Ctrl+K)"
+          onFocus={() => setFocused(true)}
+          placeholder="Search products…"
           className={cn(
             'w-full rounded-lg border border-neutral-700 bg-neutral-900 py-2.5 pl-10 pr-10 text-sm text-white',
             'focus:border-white focus:outline-none focus:ring-2 focus:ring-white/20',
@@ -89,14 +73,25 @@ useEffect(() => {
             <X className="h-4 w-4" />
           </button>
         )}
-        {recent.length > 0 && !value && (
-          <ul className="glass-panel absolute z-10 mt-1 w-full rounded-lg py-1 shadow-card-hover animate-slide-down">
+        {showRecent && (
+          <ul
+            className="glass-panel absolute z-10 mt-1 w-full rounded-lg py-1 shadow-card-hover animate-slide-down"
+            role="listbox"
+            aria-label="Recent searches"
+          >
+            <li className="px-4 py-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
+              Recent
+            </li>
             {recent.map((term) => (
               <li key={term}>
                 <button
                   type="button"
                   className="w-full px-4 py-2 text-left text-sm text-slate-300 transition-colors hover:bg-primary-600/15 hover:text-white"
-                  onClick={() => onChange(term)}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    onChange(term);
+                    setFocused(false);
+                  }}
                 >
                   {term}
                 </button>

@@ -49,7 +49,8 @@ export interface ProductFilters {
 /** Utility type — partial patch for admin updates (demonstrates Pick + Partial) */
 export type ProductPatchRequest = Partial<Pick<Product, 'name' | 'price' | 'description'>>;
 
-export type UserRole = 'CUSTOMER' | 'ADMIN';
+/** Mirrors com.smartshop.user.entity.Role */
+export type UserRole = 'USER' | 'SUPER_USER' | 'SUPER_ADMIN';
 
 /** Mirrors com.smartshop.user.dto.UserDto */
 export interface User {
