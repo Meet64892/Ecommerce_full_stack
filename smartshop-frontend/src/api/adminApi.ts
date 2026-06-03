@@ -1,7 +1,7 @@
 import { axiosInstance } from './axiosInstance';
 import type { ApiResponse, PaginatedResponse } from '@/types/api.types';
 import type { Brand } from './brandApi';
-import type { Product, User } from '@/types/product.types';
+import type { Product, User, UserRole } from '@/types/product.types';
 
 export interface PlatformStats {
   totalUsers: number;
@@ -56,6 +56,11 @@ export const adminApi = {
 
   async rejectProduct(id: string): Promise<Product> {
     const { data } = await axiosInstance.patch<ApiResponse<Product>>(`/admin/products/${id}/reject`);
+    return data.data;
+  },
+
+  async updateUserRole(userId: string, role: UserRole): Promise<User> {
+    const { data } = await axiosInstance.patch<ApiResponse<User>>(`/admin/users/${userId}/role`, { role });
     return data.data;
   },
 };

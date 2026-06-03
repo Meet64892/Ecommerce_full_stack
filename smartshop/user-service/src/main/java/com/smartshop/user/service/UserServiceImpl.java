@@ -1,9 +1,11 @@
 package com.smartshop.user.service;
 
+import com.smartshop.common.exception.ValidationException;
 import com.smartshop.user.dto.AuthResponse;
 import com.smartshop.user.dto.LoginRequest;
 import com.smartshop.user.dto.RegisterRequest;
 import com.smartshop.user.dto.UserDto;
+import com.smartshop.user.entity.BrandStatus;
 import com.smartshop.user.entity.Role;
 import com.smartshop.user.entity.User;
 import com.smartshop.user.exception.EmailAlreadyExistsException;
@@ -11,6 +13,7 @@ import com.smartshop.user.event.UserRegisteredEvent;
 import com.smartshop.user.exception.UserNotFoundException;
 import com.smartshop.user.kafka.UserEventProducer;
 import com.smartshop.user.mapper.UserMapper;
+import com.smartshop.user.repository.BrandRepository;
 import com.smartshop.user.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,6 +48,7 @@ import java.util.UUID;
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final BrandRepository brandRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
@@ -55,16 +59,18 @@ public class UserServiceImpl implements UserService {
      * Constructor injection keeps all dependencies explicit and immutable.
      *
      * @param userRepository repository for user persistence
+     * @param brandRepository repository for vendor brand linkage
      * @param passwordEncoder BCrypt password encoder
      * @param authenticationManager Spring Security authentication manager
      * @param jwtService token generator and validator
      * @param userMapper entity-to-DTO mapper
      * @param userEventProducer Kafka publisher for registration events
      */
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder,
+    public UserServiceImpl(UserRepository userRepository, BrandRepository brandRepository, PasswordEncoder passwordEncoder,
                            AuthenticationManager authenticationManager, JwtService jwtService, UserMapper userMapper,
                            UserEventProducer userEventProducer) {
         this.userRepository = userRepository;
+        this.brandRepository = brandRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
@@ -162,6 +168,34 @@ public class UserServiceImpl implements UserService {
     public UserDto currentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByEmail(email).map(userMapper::toDto).orElseThrow(() -> new UserNotFoundException(email));
+    }
+
+
+    @Override
+    @Transactional
+    public UserDto updateUserRole(UUID userId, Role newRole) {
+        String actorEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User actor = userRepository.findByEmail(actorEmail).orElseThrow(() -> new UserNotFoundException(actorEmail));
+        if (actor.getId().equals(userId)) {
+            throw new ValidationException("You cannot change your own role");
+        }
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        Role previousRole = user.getRole();
+        if (previousRole == Role.SUPER_ADMIN && newRole != Role.SUPER_ADMIN
+                && userRepository.countByRole(Role.SUPER_ADMIN) <= 1) {
+            throw new ValidationException("At least one super admin must remain on the platform");
+        }
+        user.setRole(newRole);
+        if (newRole == Role.SUPER_USER) {
+            brandRepository.findByOwnerUserId(userId).ifPresent(brand -> {
+                if (brand.getStatus() == BrandStatus.APPROVED) {
+                    user.setBrandId(brand.getId());
+                }
+            });
+        } else {
+            user.setBrandId(null);
+        }
+        return userMapper.toDto(user);
     }
 
     /**

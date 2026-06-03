@@ -4,6 +4,7 @@ import com.smartshop.user.dto.AuthResponse;
 import com.smartshop.user.dto.LoginRequest;
 import com.smartshop.user.dto.RegisterRequest;
 import com.smartshop.user.dto.UserDto;
+import com.smartshop.user.entity.Role;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -76,4 +77,9 @@ public interface UserService {
      * @return public user DTO for the SecurityContext principal
      */
     UserDto currentUser();
+
+    /**
+     * Updates a user's marketplace role (Super Admin only).
+     */
+    UserDto updateUserRole(UUID userId, Role role);
 }

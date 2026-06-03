@@ -3,7 +3,9 @@ package com.smartshop.user.controller;
 import com.smartshop.common.dto.ApiResponse;
 import com.smartshop.user.dto.BrandDto;
 import com.smartshop.user.dto.PlatformStatsDto;
+import com.smartshop.user.dto.UpdateUserRoleRequest;
 import com.smartshop.user.dto.UserDto;
+import jakarta.validation.Valid;
 import com.smartshop.user.service.BrandService;
 import com.smartshop.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -67,5 +70,11 @@ public class AdminController {
     @GetMapping("/users")
     public ApiResponse<Page<UserDto>> listUsers(Pageable pageable) {
         return ApiResponse.success(userService.listUsers(pageable), "Users loaded");
+    }
+
+    @Operation(summary = "Change user role", description = "Promote customers to vendor admin (SUPER_USER) or demote as needed.")
+    @PatchMapping("/users/{id}/role")
+    public ApiResponse<UserDto> updateUserRole(@PathVariable UUID id, @Valid @RequestBody UpdateUserRoleRequest request) {
+        return ApiResponse.success(userService.updateUserRole(id, request.role()), "User role updated");
     }
 }
