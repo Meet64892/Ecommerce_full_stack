@@ -1,12 +1,5 @@
 /**
  * product.types.ts — Catalog domain types
- *
- * PURPOSE:
- * Mirrors ProductDto and search parameters from product-service.
- *
- * CONNECTED TO:
- * - src/api/productApi.ts
- * - src/store/cartStore.ts
  */
 
 /** Mirrors com.smartshop.product.dto.ProductDto */
@@ -19,6 +12,8 @@ export interface Product {
   rating: number;
   categoryId: string;
   categoryName: string;
+  brandId?: string;
+  approvalStatus?: string;
 }
 
 export interface Category {
@@ -27,7 +22,6 @@ export interface Category {
   description?: string;
 }
 
-/** Query params for GET /products/search — bound as axios `params` (query string) */
 export interface ProductSearchParams {
   query?: string;
   categoryId?: string;
@@ -46,11 +40,10 @@ export interface ProductFilters {
   minRating?: number;
 }
 
-/** Utility type — partial patch for admin updates (demonstrates Pick + Partial) */
 export type ProductPatchRequest = Partial<Pick<Product, 'name' | 'price' | 'description'>>;
 
 /** Mirrors com.smartshop.user.entity.Role */
-export type UserRole = 'USER' | 'SUPER_USER' | 'SUPER_ADMIN';
+export type UserRole = 'USER' | 'ADMIN' | 'SUPER_ADMIN';
 
 /** Mirrors com.smartshop.user.dto.UserDto */
 export interface User {
@@ -60,5 +53,7 @@ export interface User {
   lastName: string;
   fullName: string;
   role: UserRole;
+  brandId?: string;
+  enabled?: boolean;
   createdAt: string;
 }

@@ -67,6 +67,9 @@ public class User {
     @Column(nullable = false, length = 30)
     private Role role = Role.USER;
 
+    @Column(name = "brand_id")
+    private UUID brandId;
+
     @Column(nullable = false)
     private boolean enabled = true;
 

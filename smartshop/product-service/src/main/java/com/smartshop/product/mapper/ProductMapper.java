@@ -14,6 +14,7 @@ public interface ProductMapper {
 
     @Mapping(target = "categoryId", expression = "java(resolveCategoryId(product))")
     @Mapping(target = "categoryName", expression = "java(resolveCategoryName(product))")
+    @Mapping(target = "approvalStatus", expression = "java(product.getApprovalStatus() != null ? product.getApprovalStatus().name() : null)")
     ProductDto toDto(Product product);
 
     CategoryDto toDto(Category category);

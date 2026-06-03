@@ -24,8 +24,26 @@ export const ROUTES = {
   PROFILE: '/profile',
   LOGIN: '/login',
   REGISTER: '/register',
-  ADMIN: '/admin',
-  BRAND: '/brand/products',
+  SELL: '/sell',
+  SUPER_ADMIN: '/super-admin',
+  VENDOR_ADMIN: '/admin',
+} as const;
+
+export const SUPER_ADMIN_ROUTES = {
+  DASHBOARD: '/super-admin/dashboard',
+  BRANDS: '/super-admin/brands',
+  PRODUCTS: '/super-admin/products',
+  ORDERS: '/super-admin/orders',
+  USERS: '/super-admin/users',
+  SETTINGS: '/super-admin/settings',
+} as const;
+
+export const VENDOR_ROUTES = {
+  DASHBOARD: '/admin/dashboard',
+  PRODUCTS: '/admin/products',
+  ORDERS: '/admin/orders',
+  PROMOTIONS: '/admin/promotions',
+  REPORTS: '/admin/reports',
 } as const;
 
 export const ORDER_STATUS: OrderStatus[] = [

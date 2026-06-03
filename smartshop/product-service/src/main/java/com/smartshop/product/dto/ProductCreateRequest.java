@@ -33,5 +33,6 @@ public record ProductCreateRequest(
         @NotBlank @Size(max = 2000) String description,
         @NotNull @DecimalMin(value = "0.01") BigDecimal price,
         @NotBlank @Pattern(regexp = "^[A-Z0-9-]+$") String stockKeepingUnit,
-        @NotNull UUID categoryId) {
+        @NotNull UUID categoryId,
+        UUID brandId) {
 }

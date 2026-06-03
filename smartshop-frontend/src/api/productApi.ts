@@ -97,8 +97,33 @@ export const productApi = {
     price: number;
     stockKeepingUnit: string;
     categoryId: string;
+    brandId?: string;
   }): Promise<Product> {
     const { data } = await axiosInstance.post<ApiResponse<Product>>('/products', payload);
+    return data.data;
+  },
+
+  async listPending(page = 0, size = PAGE_SIZE): Promise<PaginatedResponse<Product>> {
+    const { data } = await axiosInstance.get<ApiResponse<PaginatedResponse<Product>>>('/products', {
+      params: { page, size, pendingOnly: true },
+    });
+    return data.data;
+  },
+
+  async listByBrand(brandId: string, page = 0, size = PAGE_SIZE): Promise<PaginatedResponse<Product>> {
+    const { data } = await axiosInstance.get<ApiResponse<PaginatedResponse<Product>>>('/products', {
+      params: { page, size, brandId },
+    });
+    return data.data;
+  },
+
+  async approve(id: string): Promise<Product> {
+    const { data } = await axiosInstance.post<ApiResponse<Product>>(`/products/${id}/approve`);
+    return data.data;
+  },
+
+  async reject(id: string): Promise<Product> {
+    const { data } = await axiosInstance.post<ApiResponse<Product>>(`/products/${id}/reject`);
     return data.data;
   },
 };

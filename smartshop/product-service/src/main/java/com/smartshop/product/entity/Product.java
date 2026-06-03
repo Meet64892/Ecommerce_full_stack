@@ -52,6 +52,13 @@ public class Product {
     @Column(nullable = false)
     private double rating = 0.0;
 
+    @Column(name = "brand_id")
+    private UUID brandId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "approval_status", nullable = false, length = 30)
+    private ProductApprovalStatus approvalStatus = ProductApprovalStatus.APPROVED;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;

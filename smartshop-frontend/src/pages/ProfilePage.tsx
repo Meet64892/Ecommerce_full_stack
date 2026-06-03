@@ -1,18 +1,16 @@
-/**
- * ProfilePage.tsx — User profile view/edit
- */
-
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '@hooks/useAuth';
 import { userApi } from '@api/userApi';
 import { Input } from '@components/ui/Input';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
+import { ROUTES } from '@utils/constants';
+import { ROLE_LABELS, isCustomer } from '@utils/roles';
 import toast from 'react-hot-toast';
 import { parseApiError } from '@utils/errorHandler';
-import { ROLE_LABELS } from '@utils/roles';
 
 export default function ProfilePage() {
   const { user, refreshUser } = useAuth();
@@ -47,10 +45,18 @@ export default function ProfilePage() {
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-lg">
       <h1 className="mb-2 font-display text-2xl font-bold gradient-text">My profile</h1>
-      {profile?.role && <Badge className="mb-6">{ROLE_LABELS[profile.role]}</Badge>}
+      {profile?.role && <Badge className="mb-4">{ROLE_LABELS[profile.role]}</Badge>}
+      {isCustomer(profile?.role) && (
+        <p className="mb-6 text-sm text-slate-400">
+          Want to sell on the marketplace?{' '}
+          <Link to={ROUTES.SELL} className="link-accent">
+            Apply to become a brand owner
+          </Link>
+        </p>
+      )}
       <form
         onSubmit={handleSubmit((data) => updateMutation.mutate(data))}
-        className="surface-card space-y-4 p-6 transition-shadow duration-300 hover:shadow-glow-sm"
+        className="surface-card space-y-4 p-6"
       >
         <Input label="First name" {...register('firstName')} />
         <Input label="Last name" {...register('lastName')} />

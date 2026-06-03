@@ -1,5 +1,5 @@
 /**
- * Header.tsx — Top navigation, cart badge, user menu
+ * Header.tsx — Top navigation with role-aware links
  */
 
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
@@ -10,8 +10,12 @@ import { useCart } from '@hooks/useCart';
 import { useAuth } from '@hooks/useAuth';
 import { useUiStore } from '@store/uiStore';
 import { Badge } from '@components/ui/Badge';
-import { ROUTES } from '@utils/constants';
-import { canManageProducts, isSuperAdmin } from '@utils/roles';
+import { ROUTES, SUPER_ADMIN_ROUTES, VENDOR_ROUTES } from '@utils/constants';
+import {
+  canAccessSuperAdminPanel,
+  canAccessVendorPanel,
+  isCustomer,
+} from '@utils/roles';
 import { cn } from '@utils/cn';
 
 export function Header() {
@@ -27,11 +31,11 @@ export function Header() {
     { to: ROUTES.HOME, label: 'Home' },
     { to: ROUTES.PRODUCTS, label: 'Shop' },
     { to: ROUTES.ORDERS, label: 'Orders', protected: true },
-    ...(isAuthenticated && canManageProducts(user?.role)
-      ? [{ to: ROUTES.BRAND, label: 'My products', protected: true as const }]
+    ...(isAuthenticated && canAccessSuperAdminPanel(user?.role)
+      ? [{ to: SUPER_ADMIN_ROUTES.DASHBOARD, label: 'Super Admin', protected: true as const }]
       : []),
-    ...(isAuthenticated && isSuperAdmin(user?.role)
-      ? [{ to: ROUTES.ADMIN, label: 'Admin', protected: true as const }]
+    ...(isAuthenticated && canAccessVendorPanel(user?.role)
+      ? [{ to: VENDOR_ROUTES.DASHBOARD, label: 'Brand panel', protected: true as const }]
       : []),
   ];
 
@@ -39,42 +43,21 @@ export function Header() {
     <header className="sticky top-0 z-40 w-full border-b border-slate-700/50 glass-panel">
       <div className="flex h-16 w-full items-center justify-between gap-4 px-4 sm:px-6">
         <div className="flex items-center gap-3">
-          <button
-            type="button"
-            className="icon-btn lg:hidden"
-            onClick={toggleSidebar}
-            aria-label="Open menu"
-          >
+          <button type="button" className="icon-btn lg:hidden" onClick={toggleSidebar} aria-label="Open menu">
             <MenuIcon className="h-6 w-6" />
           </button>
           <Link
             to={ROUTES.HOME}
             className="group flex items-center gap-2 font-display font-bold tracking-tight text-white transition-opacity hover:opacity-90"
           >
-            <svg
-              className="h-8 w-8 transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3"
-              viewBox="0 0 32 32"
-              aria-hidden
-            >
-              <defs>
-                <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#8b5cf6" />
-                  <stop offset="100%" stopColor="#22d3ee" />
-                </linearGradient>
-              </defs>
-              <rect width="32" height="32" rx="8" fill="url(#logo-grad)" />
-              <path d="M8 12h16l-2 14H10L8 12z" fill="#0c0e14" />
-            </svg>
-            <span className="hidden bg-gradient-accent bg-clip-text text-transparent sm:inline">
-              SmartShop
-            </span>
+            <span className="hidden bg-gradient-accent bg-clip-text text-transparent sm:inline">SmartShop</span>
           </Link>
         </div>
 
         <nav className="hidden items-center gap-1 md:flex">
           {navLinks.map((link) => {
             if (link.protected && !isAuthenticated) return null;
-            const isActive = location.pathname === link.to;
+            const isActive = location.pathname.startsWith(link.to);
             return (
               <NavLink key={link.to} to={link.to} className="nav-link">
                 {link.label}
@@ -84,9 +67,6 @@ export function Header() {
                     className="absolute inset-x-1 -bottom-0.5 h-0.5 rounded-full bg-gradient-accent shadow-glow-sm"
                     transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                   />
-                )}
-                {isActive && shouldReduceMotion && (
-                  <span className="absolute inset-x-1 -bottom-0.5 h-0.5 rounded-full bg-gradient-accent" />
                 )}
               </NavLink>
             );
@@ -100,7 +80,7 @@ export function Header() {
             className="icon-btn group relative"
             aria-label="Open cart"
           >
-            <ShoppingCart className="h-6 w-6 transition-transform duration-200 group-hover:scale-110" />
+            <ShoppingCart className="h-6 w-6" />
             {totalItems > 0 && (
               <span className="absolute -right-0.5 -top-0.5 cart-bounce">
                 <Badge>{totalItems}</Badge>
@@ -114,40 +94,42 @@ export function Header() {
                 <User className="h-5 w-5" />
                 <span className="hidden text-sm font-medium text-slate-100 sm:inline">{user?.firstName}</span>
               </MenuButton>
-              <MenuItems
-                className={cn(
-                  'absolute right-0 mt-2 w-48 origin-top-right rounded-xl border border-slate-700/60',
-                  'glass-panel py-1 shadow-card-hover focus:outline-none animate-slide-down',
-                )}
-              >
-                {canManageProducts(user?.role) && (
+              <MenuItems className="glass-panel absolute right-0 mt-2 w-52 origin-top-right rounded-xl border border-slate-700/60 py-1 shadow-card-hover animate-slide-down">
+                {canAccessSuperAdminPanel(user?.role) && (
                   <MenuItem>
                     {({ focus }) => (
                       <button
                         type="button"
-                        className={cn(
-                          'block w-full px-4 py-2 text-left text-sm text-slate-200 transition-colors',
-                          focus && 'bg-primary-600/20 text-white',
-                        )}
-                        onClick={() => navigate(ROUTES.BRAND)}
+                        className={cn('block w-full px-4 py-2 text-left text-sm', focus && 'bg-primary-600/20 text-white')}
+                        onClick={() => navigate(SUPER_ADMIN_ROUTES.DASHBOARD)}
                       >
-                        My products
+                        Super Admin
                       </button>
                     )}
                   </MenuItem>
                 )}
-                {isSuperAdmin(user?.role) && (
+                {canAccessVendorPanel(user?.role) && (
                   <MenuItem>
                     {({ focus }) => (
                       <button
                         type="button"
-                        className={cn(
-                          'block w-full px-4 py-2 text-left text-sm text-slate-200 transition-colors',
-                          focus && 'bg-primary-600/20 text-white',
-                        )}
-                        onClick={() => navigate(ROUTES.ADMIN)}
+                        className={cn('block w-full px-4 py-2 text-left text-sm', focus && 'bg-primary-600/20 text-white')}
+                        onClick={() => navigate(VENDOR_ROUTES.DASHBOARD)}
                       >
-                        Admin dashboard
+                        Brand panel
+                      </button>
+                    )}
+                  </MenuItem>
+                )}
+                {isCustomer(user?.role) && (
+                  <MenuItem>
+                    {({ focus }) => (
+                      <button
+                        type="button"
+                        className={cn('block w-full px-4 py-2 text-left text-sm', focus && 'bg-primary-600/20 text-white')}
+                        onClick={() => navigate(ROUTES.SELL)}
+                      >
+                        Sell on SmartShop
                       </button>
                     )}
                   </MenuItem>
@@ -156,10 +138,7 @@ export function Header() {
                   {({ focus }) => (
                     <button
                       type="button"
-                      className={cn(
-                        'block w-full px-4 py-2 text-left text-sm text-slate-200 transition-colors',
-                        focus && 'bg-primary-600/20 text-white',
-                      )}
+                      className={cn('block w-full px-4 py-2 text-left text-sm', focus && 'bg-primary-600/20 text-white')}
                       onClick={() => navigate(ROUTES.PROFILE)}
                     >
                       My Profile
@@ -170,24 +149,7 @@ export function Header() {
                   {({ focus }) => (
                     <button
                       type="button"
-                      className={cn(
-                        'block w-full px-4 py-2 text-left text-sm text-slate-200 transition-colors',
-                        focus && 'bg-primary-600/20 text-white',
-                      )}
-                      onClick={() => navigate(ROUTES.ORDERS)}
-                    >
-                      My Orders
-                    </button>
-                  )}
-                </MenuItem>
-                <MenuItem>
-                  {({ focus }) => (
-                    <button
-                      type="button"
-                      className={cn(
-                        'block w-full px-4 py-2 text-left text-sm text-red-400 transition-colors',
-                        focus && 'bg-red-950/50 text-red-300',
-                      )}
+                      className={cn('block w-full px-4 py-2 text-left text-sm text-red-400', focus && 'bg-red-950/50')}
                       onClick={() => {
                         logout();
                         navigate(ROUTES.LOGIN);
@@ -202,7 +164,7 @@ export function Header() {
           ) : (
             <Link
               to={ROUTES.LOGIN}
-              className="rounded-lg bg-gradient-accent px-4 py-2 text-sm font-medium text-white shadow-glow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-glow active:scale-[0.98]"
+              className="rounded-lg bg-gradient-accent px-4 py-2 text-sm font-medium text-white shadow-glow-sm"
             >
               Sign in
             </Link>

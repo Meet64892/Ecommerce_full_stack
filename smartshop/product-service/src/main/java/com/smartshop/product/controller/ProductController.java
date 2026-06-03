@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
@@ -85,8 +86,29 @@ public class ProductController {
      */
     @Operation(summary = "List products", description = "Returns products with pagination metadata.")
     @GetMapping
-    public ApiResponse<Page<ProductDto>> list(Pageable pageable) {
+    public ApiResponse<Page<ProductDto>> list(
+            Pageable pageable,
+            @RequestParam(required = false) UUID brandId,
+            @RequestParam(required = false, defaultValue = "false") boolean pendingOnly) {
+        if (pendingOnly) {
+            return ApiResponse.success(productService.listPending(pageable), "Pending products loaded");
+        }
+        if (brandId != null) {
+            return ApiResponse.success(productService.listByBrand(brandId, pageable), "Brand products loaded");
+        }
         return ApiResponse.success(productService.list(pageable), "Products loaded");
+    }
+
+    @Operation(summary = "Approve product", description = "Super admin publishes a vendor product.")
+    @PostMapping("/{id}/approve")
+    public ApiResponse<ProductDto> approve(@PathVariable UUID id) {
+        return ApiResponse.success(productService.approve(id), "Product approved");
+    }
+
+    @Operation(summary = "Reject product", description = "Super admin rejects a vendor product.")
+    @PostMapping("/{id}/reject")
+    public ApiResponse<ProductDto> reject(@PathVariable UUID id) {
+        return ApiResponse.success(productService.reject(id), "Product rejected");
     }
 
     /**

@@ -1,7 +1,3 @@
-/**
- * RoleProtectedRoute.tsx — Restricts routes to users with allowed roles
- */
-
 import type { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@hooks/useAuth';
@@ -10,12 +6,13 @@ import { ROUTES } from '@utils/constants';
 import type { UserRole } from '@/types/product.types';
 import { hasAnyRole } from '@utils/roles';
 
-interface RoleProtectedRouteProps {
+export function RoleProtectedRoute({
+  children,
+  allowedRoles,
+}: {
   children: ReactNode;
   allowedRoles: UserRole[];
-}
-
-export function RoleProtectedRoute({ children, allowedRoles }: RoleProtectedRouteProps) {
+}) {
   const { user, isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {

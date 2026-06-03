@@ -1,6 +1,9 @@
 package com.smartshop.product.repository.jpa;
 
 import com.smartshop.product.entity.Product;
+import com.smartshop.product.entity.ProductApprovalStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
@@ -12,4 +15,10 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
     Optional<Product> findByStockKeepingUnit(String stockKeepingUnit);
 
     boolean existsByStockKeepingUnit(String stockKeepingUnit);
+
+    Page<Product> findByApprovalStatus(ProductApprovalStatus status, Pageable pageable);
+
+    Page<Product> findByBrandId(UUID brandId, Pageable pageable);
+
+    long countByApprovalStatus(ProductApprovalStatus status);
 }
