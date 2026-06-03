@@ -26,6 +26,11 @@ import java.util.UUID;
  * @see CreateOrderRequest
  * @author SmartShop Team
  */
-public record OrderItemDto(UUID id, @NotNull UUID productId, @Min(1) int quantity,
-                           @NotNull @DecimalMin("0.01") BigDecimal unitPrice) {
+public record OrderItemDto(
+        UUID id,
+        @NotNull UUID productId,
+        UUID brandId,
+        String productName,
+        @Min(1) int quantity,
+        @NotNull @DecimalMin("0.01") BigDecimal unitPrice) {
 }

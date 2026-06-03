@@ -28,9 +28,11 @@ export const ROUTES = {
   ADMIN_BRANDS: '/admin/brands',
   ADMIN_PRODUCTS: '/admin/products',
   ADMIN_USERS: '/admin/users',
+  ADMIN_ORDERS: '/admin/orders',
   BRAND: '/brand/products',
   VENDOR: '/vendor',
   VENDOR_APPLY: '/vendor/apply',
+  VENDOR_ORDERS: '/vendor/orders',
 } as const;
 
 export const ORDER_STATUS: OrderStatus[] = [

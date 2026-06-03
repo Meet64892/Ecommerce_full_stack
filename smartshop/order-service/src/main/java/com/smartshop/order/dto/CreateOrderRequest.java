@@ -26,5 +26,5 @@ import java.util.UUID;
  * @see OrderDto
  * @author SmartShop Team
  */
-public record CreateOrderRequest(@NotNull UUID userId, @NotEmpty List<@Valid OrderItemDto> items) {
+public record CreateOrderRequest(@NotNull UUID userId, @NotEmpty List<@Valid CreateOrderItemRequest> items) {
 }

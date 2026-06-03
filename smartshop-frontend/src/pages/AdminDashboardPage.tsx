@@ -6,6 +6,7 @@ const nav = [
   { to: ROUTES.ADMIN_BRANDS, label: 'Brand applications' },
   { to: ROUTES.ADMIN_PRODUCTS, label: 'Product approval' },
   { to: ROUTES.ADMIN_USERS, label: 'Users' },
+  { to: ROUTES.ADMIN_ORDERS, label: 'Orders' },
 ];
 
 export default function AdminDashboardPage() {

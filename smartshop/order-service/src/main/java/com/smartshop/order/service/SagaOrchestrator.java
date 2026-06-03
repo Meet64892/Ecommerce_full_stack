@@ -57,7 +57,13 @@ public class SagaOrchestrator {
      */
     public void start(Order order) {
         List<OrderItemDto> items = order.getItems().stream()
-                .map(item -> new OrderItemDto(item.getId(), item.getProductId(), item.getQuantity(), item.getUnitPrice()))
+                .map(item -> new OrderItemDto(
+                        item.getId(),
+                        item.getProductId(),
+                        item.getBrandId(),
+                        item.getProductName(),
+                        item.getQuantity(),
+                        item.getUnitPrice()))
                 .toList();
         eventProducer.publish(OrderEventProducer.ORDER_CREATED, order.getId().toString(), new OrderCreatedEvent(order.getId(), order.getUserId(), items));
     }

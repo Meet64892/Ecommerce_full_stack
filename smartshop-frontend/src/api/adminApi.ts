@@ -2,6 +2,7 @@ import { axiosInstance } from './axiosInstance';
 import type { ApiResponse, PaginatedResponse } from '@/types/api.types';
 import type { Brand } from './brandApi';
 import type { Product, User } from '@/types/product.types';
+import type { Order, OrderStatus } from '@/types/order.types';
 
 export interface PlatformStats {
   totalUsers: number;
@@ -51,6 +52,18 @@ export const adminApi = {
 
   async approveProduct(id: string): Promise<Product> {
     const { data } = await axiosInstance.patch<ApiResponse<Product>>(`/admin/products/${id}/approve`);
+    return data.data;
+  },
+
+  async listOrders(page = 0, size = 20): Promise<PaginatedResponse<Order>> {
+    const { data } = await axiosInstance.get<ApiResponse<PaginatedResponse<Order>>>('/admin/orders', {
+      params: { page, size },
+    });
+    return data.data;
+  },
+
+  async updateOrderStatus(id: string, status: OrderStatus): Promise<Order> {
+    const { data } = await axiosInstance.patch<ApiResponse<Order>>(`/admin/orders/${id}/status`, { status });
     return data.data;
   },
 

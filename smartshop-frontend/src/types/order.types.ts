@@ -1,25 +1,18 @@
 /**
  * order.types.ts — Order and checkout types
- *
- * PURPOSE:
- * Mirrors order-service DTOs and CreateOrderRequest for checkout.
- *
- * CONNECTED TO:
- * - src/api/orderApi.ts
- * - src/pages/CheckoutPage.tsx
  */
 
 export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
 
-/** Mirrors com.smartshop.order.dto.OrderItemDto */
 export interface OrderItem {
   id: string;
   productId: string;
+  brandId?: string;
+  productName?: string;
   quantity: number;
   unitPrice: number;
 }
 
-/** Mirrors com.smartshop.order.dto.OrderDto */
 export interface Order {
   id: string;
   userId: string;
@@ -35,6 +28,8 @@ export interface CreateOrderRequest {
     productId: string;
     quantity: number;
     unitPrice: number;
+    brandId?: string;
+    productName?: string;
   }>;
 }
 

@@ -52,7 +52,9 @@ Unchanged storefront flow: browse (public `GET /products`), cart, checkout, orde
 | `/admin/brands` | Approve vendor applications |
 | `/admin/products` | Approve product listings |
 | `/admin/users` | User list |
+| `/admin/orders` | Platform orders + status updates |
 | `/vendor` | Vendor dashboard |
+| `/vendor/orders` | Brand-scoped order fulfillment |
 | `/vendor/apply` | Brand application (customers) |
 | `/brand/products` | Vendor product CRUD |
 

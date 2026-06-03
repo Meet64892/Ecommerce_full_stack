@@ -49,6 +49,11 @@ export default function VendorDashboardPage() {
           <h2 className="font-semibold text-slate-100">Product management</h2>
           <p className="mt-1 text-sm text-slate-400">Add and manage your catalog</p>
         </Link>
+        <Link to={ROUTES.VENDOR_ORDERS} className="surface-card block p-5 hover:border-primary-500/40">
+          <Truck className="mb-2 h-6 w-6 text-primary-400" />
+          <h2 className="font-semibold text-slate-100">Orders</h2>
+          <p className="mt-1 text-sm text-slate-400">Fulfill orders for your brand</p>
+        </Link>
         <div className="surface-card p-5 opacity-80">
           <Truck className="mb-2 h-6 w-6 text-slate-500" />
           <h2 className="font-semibold text-slate-100">Orders</h2>

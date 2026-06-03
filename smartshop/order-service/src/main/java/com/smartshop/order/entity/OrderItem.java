@@ -51,6 +51,12 @@ public class OrderItem {
     @Column(nullable = false)
     private UUID productId;
 
+    @Column(name = "brand_id")
+    private UUID brandId;
+
+    @Column(name = "product_name", length = 200)
+    private String productName;
+
     @Column(nullable = false)
     private int quantity;
 
