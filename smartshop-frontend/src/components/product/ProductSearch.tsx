@@ -8,6 +8,9 @@ import { useDebounce } from '@hooks/useDebounce';
 import { useLocalStorage } from '@hooks/useLocalStorage';
 import { cn } from '@utils/cn';
 
+import { useCallback } from 'react';
+
+
 export interface ProductSearchProps {
   value: string;
   onChange: (value: string) => void;
@@ -27,6 +30,22 @@ export const ProductSearch = forwardRef<HTMLInputElement, ProductSearchProps>(
     const [recent, setRecent] = useLocalStorage<string[]>('smartshop-recent-searches', []);
     const debounced = useDebounce(value, 400);
 
+
+// Create a stable wrapper for setRecent
+const saveRecentSearch = useCallback((searchTerm: string) => {
+  if (!searchTerm.trim()) return;
+  
+  setRecent((prev) => {
+    const next = [searchTerm, ...prev.filter((s) => s !== searchTerm)].slice(0, 5);
+    return next;
+  });
+}, [setRecent]); // This dependency is still problematic but less likely to cause loops
+
+useEffect(() => {
+  if (!debounced.trim()) return;
+  saveRecentSearch(debounced);
+}, [debounced, saveRecentSearch]);
+
     useEffect(() => {
       if (!debounced.trim()) return;
       setRecent((prev) => {
@@ -35,16 +54,16 @@ export const ProductSearch = forwardRef<HTMLInputElement, ProductSearchProps>(
       });
     }, [debounced, setRecent]);
 
-    useEffect(() => {
-      const onKeyDown = (e: KeyboardEvent) => {
-        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-          e.preventDefault();
-          inputRef.current?.focus();
-        }
-      };
-      window.addEventListener('keydown', onKeyDown);
-      return () => window.removeEventListener('keydown', onKeyDown);
-    }, []);
+    // useEffect(() => {
+    //   const onKeyDown = (e: KeyboardEvent) => {
+    //     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    //       e.preventDefault();
+    //       inputRef.current?.focus();
+    //     }
+    //   };
+    //   window.addEventListener('keydown', onKeyDown);
+    //   return () => window.removeEventListener('keydown', onKeyDown);
+    // }, []);
 
     return (
       <div className="relative w-full">
