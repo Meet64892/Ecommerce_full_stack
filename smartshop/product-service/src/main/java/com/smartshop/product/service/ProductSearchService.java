@@ -3,6 +3,7 @@ package com.smartshop.product.service;
 import com.smartshop.product.dto.ProductDto;
 import com.smartshop.product.dto.ProductSearchRequest;
 import com.smartshop.product.entity.Product;
+import com.smartshop.product.entity.ProductApprovalStatus;
 import com.smartshop.product.mapper.ProductMapper;
 import com.smartshop.product.repository.search.ProductSearchRepository;
 import org.slf4j.Logger;
@@ -78,6 +79,7 @@ public class ProductSearchService {
                 ? productSearchRepository.findAll(pageable)
                 : productSearchRepository.findByNameContainingOrDescriptionContaining(query, query, pageable);
         List<ProductDto> filtered = page.getContent().stream()
+                .filter(ProductSearchService::isVisibleInShop)
                 .filter(product -> request.categoryId() == null || request.categoryId().equals(resolveCategoryId(product)))
                 .filter(product -> request.minPrice() == null || product.getPrice().compareTo(request.minPrice()) >= 0)
                 .filter(product -> request.maxPrice() == null || product.getPrice().compareTo(request.maxPrice()) <= 0)
@@ -85,6 +87,11 @@ public class ProductSearchService {
                 .map(productMapper::toDto)
                 .toList();
         return new PageImpl<>(filtered, pageable, page.getTotalElements());
+    }
+
+    private static boolean isVisibleInShop(Product product) {
+        ProductApprovalStatus status = product.getApprovalStatus();
+        return status == null || status == ProductApprovalStatus.APPROVED;
     }
 
     private static java.util.UUID resolveCategoryId(Product product) {
