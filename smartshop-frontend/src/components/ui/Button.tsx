@@ -22,10 +22,14 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: 'bg-white text-neutral-950 hover:bg-neutral-200 focus:ring-neutral-400',
-  secondary: 'border border-neutral-700 bg-neutral-900 text-white hover:bg-neutral-800 focus:ring-neutral-600',
-  ghost: 'bg-transparent text-white hover:bg-neutral-900',
-  danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
+  primary:
+    'relative overflow-hidden bg-gradient-accent text-white shadow-glow-sm hover:bg-gradient-accent-hover hover:shadow-glow hover:scale-[1.02] active:scale-[0.98] focus:ring-primary-500/50 btn-shine',
+  secondary:
+    'border border-slate-600/80 bg-surface-elevated text-slate-100 hover:border-primary-500/50 hover:bg-surface-hover hover:shadow-glow-sm active:scale-[0.98] focus:ring-primary-500/40',
+  ghost:
+    'bg-transparent text-slate-200 hover:bg-surface-hover hover:text-white active:scale-[0.98]',
+  danger:
+    'bg-red-600/90 text-white hover:bg-red-500 hover:shadow-[0_0_16px_-4px_rgba(239,68,68,0.5)] active:scale-[0.98] focus:ring-red-500/50',
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -57,8 +61,9 @@ const ButtonComponent = forwardRef<HTMLButtonElement, ButtonProps>(
       type="button"
       disabled={disabled || isLoading}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors',
-        'focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+        'inline-flex items-center justify-center gap-2 rounded-lg font-medium',
+        'transition-all duration-200 ease-spring',
+        'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-surface-muted disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100',
         variantClasses[variant],
         sizeClasses[size],
         className,

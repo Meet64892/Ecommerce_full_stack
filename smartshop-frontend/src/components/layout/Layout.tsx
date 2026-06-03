@@ -15,11 +15,11 @@ import { Sidebar } from './Sidebar';
 import { CartDrawer } from '@components/cart/CartDrawer';
 
 /**
- * Layout — Full-width black theme shell with no horizontal padding on main content.
+ * Layout — Full-width themed shell with no horizontal padding on main content.
  */
 export function Layout() {
   return (
-    <div className="flex min-h-screen w-full flex-col bg-neutral-950">
+    <div className="flex min-h-screen w-full flex-col bg-surface-muted">
       <Header />
       <div className="flex w-full flex-1">
         <Sidebar />

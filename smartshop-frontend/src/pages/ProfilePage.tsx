@@ -44,10 +44,10 @@ export default function ProfilePage() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-lg">
-      <h1 className="mb-6 text-2xl font-bold">My profile</h1>
+      <h1 className="mb-6 font-display text-2xl font-bold gradient-text">My profile</h1>
       <form
         onSubmit={handleSubmit((data) => updateMutation.mutate(data))}
-        className="space-y-4 rounded-xl border bg-white p-6"
+        className="surface-card space-y-4 p-6 transition-shadow duration-300 hover:shadow-glow-sm"
       >
         <Input label="First name" {...register('firstName')} />
         <Input label="Last name" {...register('lastName')} />

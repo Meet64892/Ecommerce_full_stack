@@ -172,9 +172,9 @@ export default function CheckoutPage() {
             animate={{ scale: 1, opacity: 1 }}
             className="text-center"
           >
-            <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
-            <h2 className="mt-4 text-xl font-bold">Order confirmed!</h2>
-            <p className="mt-2 text-gray-600">Order ID: {orderId}</p>
+            <CheckCircle className="mx-auto h-16 w-16 text-emerald-400 drop-shadow-[0_0_12px_rgba(52,211,153,0.5)]" />
+            <h2 className="mt-4 text-xl font-bold text-slate-100">Order confirmed!</h2>
+            <p className="mt-2 text-slate-400">Order ID: {orderId}</p>
             <Button className="mt-6" onClick={() => navigate(`/orders/${orderId}`)}>
               View order
             </Button>

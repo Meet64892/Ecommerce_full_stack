@@ -67,11 +67,11 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -16 }}
-                  className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl"
+                  className="glass-panel w-full max-w-lg rounded-xl p-6 shadow-card-hover animate-scale-in"
                 >
                   <div className="mb-4 flex items-start justify-between gap-4">
                     {title && (
-                      <DialogTitle className="text-lg font-semibold text-gray-900">
+                      <DialogTitle className="text-lg font-semibold text-slate-100">
                         {title}
                       </DialogTitle>
                     )}

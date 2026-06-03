@@ -56,9 +56,9 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
       <Button type="submit" className="w-full" isLoading={isLoading}>
         Create account
       </Button>
-      <p className="text-center text-sm text-gray-600">
+      <p className="text-center text-sm text-slate-500">
         Already have an account?{' '}
-        <Link to={ROUTES.LOGIN} className="text-primary-600 hover:underline">
+        <Link to={ROUTES.LOGIN} className="link-accent">
           Sign in
         </Link>
       </p>

@@ -50,9 +50,9 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
       <Button type="submit" className="w-full" isLoading={isLoading}>
         Sign in
       </Button>
-      <p className="text-center text-sm text-gray-600">
+      <p className="text-center text-sm text-slate-500">
         No account?{' '}
-        <Link to={ROUTES.REGISTER} className="text-primary-600 hover:underline">
+        <Link to={ROUTES.REGISTER} className="link-accent">
           Register
         </Link>
       </p>

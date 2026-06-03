@@ -18,17 +18,17 @@ export default function CartPage() {
       animate={{ opacity: 1, y: 0 }}
       className="mx-auto max-w-3xl"
     >
-      <h1 className="mb-6 text-2xl font-bold">Your cart</h1>
+      <h1 className="mb-6 font-display text-2xl font-bold text-slate-100">Your cart</h1>
       {items.length === 0 ? (
-        <p className="text-gray-500">
+        <p className="text-slate-500">
           Cart is empty.{' '}
-          <Link to={ROUTES.PRODUCTS} className="text-primary-600 hover:underline">
+          <Link to={ROUTES.PRODUCTS} className="link-accent">
             Continue shopping
           </Link>
         </p>
       ) : (
         <>
-          <div className="rounded-xl border bg-white px-4">
+          <div className="surface-card px-4">
             {items.map((item) => (
               <CartItem key={item.product.id} item={item} />
             ))}

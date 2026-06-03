@@ -28,7 +28,8 @@ export function CartDrawer() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/40"
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
             onClick={() => setOpen(false)}
           />
           <motion.aside
@@ -36,19 +37,23 @@ export function CartDrawer() {
             animate={{ x: 0 }}
             exit={reduceMotion ? undefined : { x: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            className="fixed inset-y-0 right-0 z-50 flex w-full max-w-full flex-col bg-white shadow-xl md:max-w-[400px]"
+            className="glass-panel fixed inset-y-0 right-0 z-50 flex w-full max-w-full flex-col shadow-card-hover md:max-w-[400px]"
           >
-            <div className="flex items-center justify-between border-b px-4 py-4">
-              <h2 className="text-lg font-semibold">Your cart</h2>
-              <button type="button" onClick={() => setOpen(false)} aria-label="Close cart">
+            <div className="flex items-center justify-between border-b border-slate-700/50 px-4 py-4">
+              <h2 className="font-display text-lg font-semibold text-slate-100">Your cart</h2>
+              <button type="button" onClick={() => setOpen(false)} className="icon-btn" aria-label="Close cart">
                 <X className="h-6 w-6" />
               </button>
             </div>
             <div className="flex-1 overflow-y-auto px-4">
               {items.length === 0 ? (
-                <p className="py-8 text-center text-neutral-500">
+                <p className="py-8 text-center text-slate-500">
                   Your cart is empty.{' '}
-                  <Link to={ROUTES.PRODUCTS} className="text-white underline" onClick={() => setOpen(false)}>
+                  <Link
+                    to={ROUTES.PRODUCTS}
+                    className="link-accent"
+                    onClick={() => setOpen(false)}
+                  >
                     Start shopping
                   </Link>
                 </p>
@@ -57,7 +62,7 @@ export function CartDrawer() {
               )}
             </div>
             {items.length > 0 && (
-              <div className="border-t p-4">
+              <div className="border-t border-slate-700/50 p-4">
                 <CartSummary totalItems={totalItems} totalPrice={totalPrice} />
               </div>
             )}

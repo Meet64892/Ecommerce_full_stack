@@ -26,7 +26,7 @@ const stepVariants = {
 
 export function OrderTimeline({ status }: { status: OrderStatus }) {
   if (status === 'CANCELLED') {
-    return <p className="text-sm text-red-600">Order was cancelled.</p>;
+    return <p className="text-sm text-red-400">Order was cancelled.</p>;
   }
 
   const currentIndex = FLOW.indexOf(status);
@@ -42,7 +42,10 @@ export function OrderTimeline({ status }: { status: OrderStatus }) {
             <div className="flex w-full items-center">
               {index > 0 && (
                 <div
-                  className={cn('h-0.5 flex-1', isComplete || isCurrent ? 'bg-primary-600' : 'bg-gray-200')}
+                  className={cn(
+                    'h-0.5 flex-1 transition-colors duration-300',
+                    isComplete || isCurrent ? 'bg-gradient-accent' : 'bg-slate-700',
+                  )}
                 />
               )}
               <motion.div
@@ -50,22 +53,30 @@ export function OrderTimeline({ status }: { status: OrderStatus }) {
                 initial="inactive"
                 animate={isCurrent ? 'active' : isComplete ? 'complete' : 'inactive'}
                 className={cn(
-                  'flex h-10 w-10 items-center justify-center rounded-full border-2',
-                  isComplete && 'border-primary-600 bg-primary-600 text-white',
-                  isCurrent && 'border-primary-600 bg-white text-primary-600',
-                  !isComplete && !isCurrent && 'border-gray-200 bg-white text-gray-300',
-                  isCurrent && 'animate-pulse',
+                  'flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-300',
+                  isComplete && 'border-primary-500 bg-gradient-accent text-white shadow-glow-sm',
+                  isCurrent && 'border-primary-400 bg-surface-elevated text-primary-300 shadow-glow-sm',
+                  !isComplete && !isCurrent && 'border-slate-700 bg-surface-muted text-slate-600',
+                  isCurrent && 'animate-pulse-glow',
                 )}
               >
                 <Icon className="h-5 w-5" />
               </motion.div>
               {index < FLOW.length - 1 && (
                 <div
-                  className={cn('h-0.5 flex-1', index < currentIndex ? 'bg-primary-600' : 'bg-gray-200')}
+                  className={cn(
+                    'h-0.5 flex-1 transition-colors duration-300',
+                    index < currentIndex ? 'bg-gradient-accent' : 'bg-slate-700',
+                  )}
                 />
               )}
             </div>
-            <span className="mt-2 text-xs font-medium text-gray-600">
+            <span
+              className={cn(
+                'mt-2 text-xs font-medium transition-colors',
+                isCurrent ? 'text-primary-300' : isComplete ? 'text-slate-300' : 'text-slate-600',
+              )}
+            >
               {ORDER_STATUS_LABELS[step]}
             </span>
           </li>

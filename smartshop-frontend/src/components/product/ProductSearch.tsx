@@ -90,12 +90,12 @@ useEffect(() => {
           </button>
         )}
         {recent.length > 0 && !value && (
-          <ul className="absolute z-10 mt-1 w-full rounded-lg border border-neutral-800 bg-neutral-900 py-1 shadow-xl">
+          <ul className="glass-panel absolute z-10 mt-1 w-full rounded-lg py-1 shadow-card-hover animate-slide-down">
             {recent.map((term) => (
               <li key={term}>
                 <button
                   type="button"
-                  className="w-full px-4 py-2 text-left text-sm text-neutral-300 hover:bg-neutral-800"
+                  className="w-full px-4 py-2 text-left text-sm text-slate-300 transition-colors hover:bg-primary-600/15 hover:text-white"
                   onClick={() => onChange(term)}
                 >
                   {term}

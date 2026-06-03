@@ -9,26 +9,30 @@ import type { Order } from '@/types/order.types';
 import { formatCurrency, formatRelativeTime, formatOrderStatus } from '@utils/formatters';
 import { OrderTimeline } from './OrderTimeline';
 import { Badge } from '@components/ui/Badge';
+import { cn } from '@utils/cn';
 
 export function OrderCard({ order }: { order: Order }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+    <div className="card-interactive overflow-hidden">
       <button
         type="button"
-        className="flex w-full items-center justify-between p-4 text-left hover:bg-gray-50"
+        className={cn(
+          'flex w-full items-center justify-between p-4 text-left transition-colors duration-200',
+          'hover:bg-surface-hover/50',
+        )}
         onClick={() => setExpanded((e) => !e)}
       >
         <div>
-          <p className="font-medium text-gray-900">Order #{order.id.slice(0, 8)}</p>
-          <p className="text-sm text-gray-500">{formatRelativeTime(order.createdAt)}</p>
+          <p className="font-medium text-slate-100">Order #{order.id.slice(0, 8)}</p>
+          <p className="text-sm text-slate-500">{formatRelativeTime(order.createdAt)}</p>
         </div>
         <div className="flex items-center gap-3">
           <Badge variant={order.status === 'DELIVERED' ? 'success' : 'gray'}>
             {formatOrderStatus(order.status)}
           </Badge>
-          <span className="font-semibold">{formatCurrency(order.totalAmount)}</span>
+          <span className="font-semibold text-slate-100">{formatCurrency(order.totalAmount)}</span>
         </div>
       </button>
       <AnimatePresence>
@@ -37,12 +41,13 @@ export function OrderCard({ order }: { order: Order }) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="border-t px-4 pb-4"
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="border-t border-slate-700/50 px-4 pb-4"
           >
             <div className="py-4">
               <OrderTimeline status={order.status} />
             </div>
-            <ul className="space-y-2 text-sm text-gray-600">
+            <ul className="space-y-2 text-sm text-slate-400">
               {order.items.map((item) => (
                 <li key={item.id} className="flex justify-between">
                   <span>
@@ -52,10 +57,7 @@ export function OrderCard({ order }: { order: Order }) {
                 </li>
               ))}
             </ul>
-            <Link
-              to={`/orders/${order.id}`}
-              className="mt-3 inline-block text-sm text-primary-600 hover:underline"
-            >
+            <Link to={`/orders/${order.id}`} className="link-accent mt-3 inline-block text-sm">
               View details
             </Link>
           </motion.div>

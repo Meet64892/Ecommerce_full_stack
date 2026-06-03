@@ -59,7 +59,7 @@ export default function OrdersPage() {
       {isLoading ? (
         <Spinner size="lg" />
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center py-16 text-gray-500">
+        <div className="flex flex-col items-center py-16 text-slate-500">
           <Package className="mb-4 h-12 w-12" />
           <p>No orders in this view.</p>
         </div>
