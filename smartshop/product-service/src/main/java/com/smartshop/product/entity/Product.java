@@ -18,22 +18,6 @@ import java.util.UUID;
 
 /**
  * Product - Catalog item stored in PostgreSQL and indexed in Elasticsearch.
- *
- * <h2>Purpose</h2>
- * PostgreSQL is excellent for transactional relational data, while Elasticsearch is optimized for full-text search
- * through inverted indexes. This entity is intentionally annotated for both systems to demonstrate a dual-write model.
- *
- * <h2>Key Concepts</h2>
- * <ul>
- *   <li>@Document: Declares the Elasticsearch index name that stores searchable product documents.</li>
- *   <li>@Field: Controls how values are indexed, such as text analysis for names and keyword exact matching for SKU.</li>
- * </ul>
- *
- * <h2>How it fits in the system</h2>
- * ProductService saves it to PostgreSQL and ProductSearchRepository indexes the same object for search endpoints.
- *
- * @see com.smartshop.product.repository.ProductRepository
- * @author SmartShop Team
  */
 @Getter
 @Setter
@@ -41,18 +25,18 @@ import java.util.UUID;
 @Entity
 @Table(name = "products")
 @Document(indexName = "products")
-@Setting(settingPath = "/elasticsearch/settings.json") // Optional
-@EntityListeners(AuditingEntityListener.class)  // Add this line
+@Setting(settingPath = "/elasticsearch/settings.json")
+@EntityListeners(AuditingEntityListener.class)
 public class Product {
     @Id
     @GeneratedValue
     private UUID id;
 
-    @Field(type = FieldType.Text)
+    @Field(type = FieldType.Text, analyzer = "product_analyzer")
     @Column(nullable = false, length = 200)
     private String name;
 
-    @Field(type = FieldType.Text)
+    @Field(type = FieldType.Text, analyzer = "product_analyzer")
     @Column(nullable = false, length = 2000)
     private String description;
 
@@ -72,24 +56,24 @@ public class Product {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
+    /** Flattened for Elasticsearch; populated before indexing. */
+    @Transient
+    @Field(type = FieldType.Keyword)
+    private UUID categoryId;
+
+    /** Flattened for Elasticsearch; populated before indexing. */
+    @Transient
+    @Field(type = FieldType.Keyword)
+    private String categoryName;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    // Optional: Add last modified timestamp too
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    /**
-     * Creates a product with required catalog fields.
-     *
-     * @param name searchable product name
-     * @param description searchable product description
-     * @param price current selling price
-     * @param stockKeepingUnit unique SKU for integrations
-     * @param category owning category
-     */
     public Product(String name, String description, BigDecimal price, String stockKeepingUnit, Category category) {
         this.name = name;
         this.description = description;

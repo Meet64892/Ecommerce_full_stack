@@ -7,42 +7,28 @@ import com.smartshop.product.entity.Product;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-/**
- * ProductMapper - Compile-time mapper for catalog DTOs.
- *
- * <h2>Purpose</h2>
- * MapStruct avoids reflection and catches field mismatches at build time. It keeps controller response construction
- * concise while making entity-to-DTO transformations explicit.
- *
- * <h2>Key Concepts</h2>
- * <ul>
- *   <li>Flattening: Nested category fields are mapped to categoryId/categoryName.</li>
- *   <li>Generated implementation: The mapper class is produced during compilation.</li>
- * </ul>
- *
- * <h2>How it fits in the system</h2>
- * ProductServiceImpl and ProductSearchService use this mapper before returning API responses.
- *
- * @see ProductDto
- * @author SmartShop Team
- */
+import java.util.UUID;
+
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
-    /**
-     * Converts Product to ProductDto while flattening category fields.
-     *
-     * @param product persistent product entity
-     * @return public product DTO
-     */
-    @Mapping(target = "categoryId", source = "category.id")
-    @Mapping(target = "categoryName", source = "category.name")
+
+    @Mapping(target = "categoryId", expression = "java(resolveCategoryId(product))")
+    @Mapping(target = "categoryName", expression = "java(resolveCategoryName(product))")
     ProductDto toDto(Product product);
 
-    /**
-     * Converts Category to CategoryDto.
-     *
-     * @param category persistent category entity
-     * @return public category DTO
-     */
     CategoryDto toDto(Category category);
+
+    default UUID resolveCategoryId(Product product) {
+        if (product.getCategoryId() != null) {
+            return product.getCategoryId();
+        }
+        return product.getCategory() != null ? product.getCategory().getId() : null;
+    }
+
+    default String resolveCategoryName(Product product) {
+        if (product.getCategoryName() != null) {
+            return product.getCategoryName();
+        }
+        return product.getCategory() != null ? product.getCategory().getName() : null;
+    }
 }
