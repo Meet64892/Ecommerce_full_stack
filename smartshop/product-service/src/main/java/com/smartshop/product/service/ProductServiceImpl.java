@@ -85,7 +85,11 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     public ProductDto get(UUID id) {
-        return productRepository.findById(id).map(productMapper::toDto).orElseThrow(() -> new ProductNotFoundException(id));
+        Product product = productRepository.findById(id).orElseThrow(() -> new ProductNotFoundException(id));
+        if (product.getApprovalStatus() != null && product.getApprovalStatus() != ProductApprovalStatus.APPROVED) {
+            throw new ProductNotFoundException(id);
+        }
+        return productMapper.toDto(product);
     }
 
     @Override

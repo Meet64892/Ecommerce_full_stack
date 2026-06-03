@@ -3,6 +3,7 @@ package com.smartshop.product.service;
 import com.smartshop.product.dto.ProductDto;
 import com.smartshop.product.dto.ProductSearchRequest;
 import com.smartshop.product.entity.Product;
+import com.smartshop.product.entity.ProductApprovalStatus;
 import com.smartshop.product.mapper.ProductMapper;
 import com.smartshop.product.repository.jpa.ProductRepository;
 import org.springframework.data.domain.Page;

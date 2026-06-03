@@ -26,6 +26,7 @@ import java.util.UUID;
 @RequestMapping("/brands")
 @Tag(name = "Brands", description = "Multi-vendor brand onboarding and management")
 public class BrandController {
+
     private final BrandService brandService;
 
     public BrandController(BrandService brandService) {
@@ -44,10 +45,16 @@ public class BrandController {
         return ApiResponse.success(brandService.getMyBrand(), "Brand loaded");
     }
 
-    @Operation(summary = "Get brand", description = "Load brand by id (public if approved).")
-    @GetMapping("/{id}")
-    public ApiResponse<BrandDto> get(@PathVariable UUID id) {
-        return ApiResponse.success(brandService.getBrand(id), "Brand loaded");
+    @Operation(summary = "Pending brands", description = "Super admin lists pending vendor applications.")
+    @GetMapping("/pending")
+    public ApiResponse<Page<BrandDto>> pending(Pageable pageable) {
+        return ApiResponse.success(brandService.listPendingBrands(pageable), "Pending brands loaded");
+    }
+
+    @Operation(summary = "Platform stats", description = "Super admin dashboard metrics from user/brand data.")
+    @GetMapping("/stats/overview")
+    public ApiResponse<PlatformStatsDto> stats() {
+        return ApiResponse.success(brandService.platformStats(), "Platform stats loaded");
     }
 
     @Operation(summary = "List brands", description = "Super admin lists all brands.")
@@ -56,10 +63,10 @@ public class BrandController {
         return ApiResponse.success(brandService.listBrands(pageable), "Brands loaded");
     }
 
-    @Operation(summary = "Pending brands", description = "Super admin lists pending vendor applications.")
-    @GetMapping("/pending")
-    public ApiResponse<Page<BrandDto>> pending(Pageable pageable) {
-        return ApiResponse.success(brandService.listPendingBrands(pageable), "Pending brands loaded");
+    @Operation(summary = "Get brand", description = "Load brand by id (public if approved).")
+    @GetMapping("/{id}")
+    public ApiResponse<BrandDto> get(@PathVariable UUID id) {
+        return ApiResponse.success(brandService.getBrand(id), "Brand loaded");
     }
 
     @Operation(summary = "Approve brand", description = "Super admin approves vendor and promotes owner to ADMIN.")
@@ -92,11 +99,5 @@ public class BrandController {
     @PostMapping("/vendor-admin")
     public ApiResponse<BrandDto> createVendorAdmin(@Valid @RequestBody CreateVendorAdminRequest request) {
         return ApiResponse.success(brandService.createVendorAdmin(request), "Vendor admin created");
-    }
-
-    @Operation(summary = "Platform stats", description = "Super admin dashboard metrics from user/brand data.")
-    @GetMapping("/stats/overview")
-    public ApiResponse<PlatformStatsDto> stats() {
-        return ApiResponse.success(brandService.platformStats(), "Platform stats loaded");
     }
 }

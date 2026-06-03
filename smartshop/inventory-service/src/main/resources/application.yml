@@ -10,7 +10,7 @@ spring:
     import: optional:configserver:http://localhost:8888
   datasource:
     url: jdbc:postgresql://localhost:5432/smartshop_inventory
-    username: postgres
+    username: smartshop
     password: smartshop
   jpa:
     hibernate:
