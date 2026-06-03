@@ -1,14 +1,14 @@
 package com.smartshop.product.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -35,6 +35,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Entity
 @Table(name = "categories")
+@EntityListeners(AuditingEntityListener.class)  // Add this line
 public class Category {
     @Id
     @GeneratedValue
@@ -46,6 +47,14 @@ public class Category {
     @Column(length = 500)
     private String description;
 
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    // Optional: Add last modified timestamp too
+    @LastModifiedDate
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
     /**
      * Creates a category with a display name and optional description.
      *
