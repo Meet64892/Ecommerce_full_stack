@@ -15,17 +15,15 @@ import { Sidebar } from './Sidebar';
 import { CartDrawer } from '@components/cart/CartDrawer';
 
 /**
- * Layout — Persistent chrome wrapping page content
- *
- * LEARNING NOTE: Mobile-first — single column by default; md: breakpoints widen layout.
+ * Layout — Full-width black theme shell with no horizontal padding on main content.
  */
 export function Layout() {
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50">
+    <div className="flex min-h-screen w-full flex-col bg-neutral-950">
       <Header />
-      <div className="flex flex-1">
+      <div className="flex w-full flex-1">
         <Sidebar />
-        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
+        <main className="full-bleed w-full flex-1 py-6">
           <Outlet />
         </main>
       </div>

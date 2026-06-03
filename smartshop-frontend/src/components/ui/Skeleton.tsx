@@ -9,7 +9,7 @@ export type SkeletonProps = HTMLAttributes<HTMLDivElement>;
 
 function SkeletonBase({ className, ...props }: SkeletonProps) {
   return (
-    <div className={cn('animate-pulse rounded-md bg-gray-200', className)} aria-hidden {...props} />
+    <div className={cn('animate-pulse rounded-md bg-neutral-800', className)} aria-hidden {...props} />
   );
 }
 

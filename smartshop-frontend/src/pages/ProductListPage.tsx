@@ -108,10 +108,10 @@ export default function ProductListPage() {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -16 }}
-      className="space-y-6"
+      className="w-full space-y-6 px-6 md:px-12"
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Shop</h1>
+        <h1 className="text-2xl font-bold text-white">Shop</h1>
         <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center lg:max-w-xl">
           <ProductSearch
             value={searchInput}

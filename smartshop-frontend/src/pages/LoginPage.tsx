@@ -16,9 +16,9 @@ export default function LoginPage() {
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mx-auto max-w-md rounded-xl border bg-white p-8 shadow-sm"
+      className="mx-auto max-w-md border border-neutral-800 bg-neutral-900 p-8"
     >
-      <h1 className="mb-6 text-2xl font-bold text-center">Sign in</h1>
+      <h1 className="mb-6 text-center text-2xl font-bold text-white">Sign in</h1>
       <LoginForm onSuccess={() => navigate(from, { replace: true })} />
     </motion.div>
   );

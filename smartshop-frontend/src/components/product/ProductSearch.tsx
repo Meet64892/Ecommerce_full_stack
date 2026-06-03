@@ -14,11 +14,6 @@ export interface ProductSearchProps {
   isSearching?: boolean;
 }
 
-/**
- * ProductSearch — Lifted state lives on ProductListPage (shareable URL + single source)
- *
- * LEARNING NOTE: forwardRef exposes focus() for parent keyboard shortcut handler.
- */
 export const ProductSearch = forwardRef<HTMLInputElement, ProductSearchProps>(
   function ProductSearch({ value, onChange, isSearching }, ref) {
     const inputRef = useRef<HTMLInputElement>(null);
@@ -48,7 +43,7 @@ export const ProductSearch = forwardRef<HTMLInputElement, ProductSearchProps>(
 
     return (
       <div className="relative w-full">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
         <input
           ref={inputRef}
           type="search"
@@ -56,12 +51,12 @@ export const ProductSearch = forwardRef<HTMLInputElement, ProductSearchProps>(
           onChange={(e) => onChange(e.target.value)}
           placeholder="Search products… (Ctrl+K)"
           className={cn(
-            'w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-10 text-sm',
-            'focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20',
+            'w-full rounded-lg border border-neutral-700 bg-neutral-900 py-2.5 pl-10 pr-10 text-sm text-white',
+            'focus:border-white focus:outline-none focus:ring-2 focus:ring-white/20',
           )}
         />
         {isSearching && (
-          <span className="absolute right-10 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+          <span className="absolute right-10 top-1/2 -translate-y-1/2 text-xs text-neutral-500">
             Searching…
           </span>
         )}
@@ -69,19 +64,19 @@ export const ProductSearch = forwardRef<HTMLInputElement, ProductSearchProps>(
           <button
             type="button"
             onClick={() => onChange('')}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white"
             aria-label="Clear search"
           >
             <X className="h-4 w-4" />
           </button>
         )}
         {recent.length > 0 && !value && (
-          <ul className="absolute z-10 mt-1 w-full rounded-lg border bg-white py-1 shadow-lg">
+          <ul className="absolute z-10 mt-1 w-full rounded-lg border border-neutral-800 bg-neutral-900 py-1 shadow-xl">
             {recent.map((term) => (
               <li key={term}>
                 <button
                   type="button"
-                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50"
+                  className="w-full px-4 py-2 text-left text-sm text-neutral-300 hover:bg-neutral-800"
                   onClick={() => onChange(term)}
                 >
                   {term}

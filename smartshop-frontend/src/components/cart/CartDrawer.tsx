@@ -46,9 +46,9 @@ export function CartDrawer() {
             </div>
             <div className="flex-1 overflow-y-auto px-4">
               {items.length === 0 ? (
-                <p className="py-8 text-center text-gray-500">
+                <p className="py-8 text-center text-neutral-500">
                   Your cart is empty.{' '}
-                  <Link to={ROUTES.PRODUCTS} className="text-primary-600" onClick={() => setOpen(false)}>
+                  <Link to={ROUTES.PRODUCTS} className="text-white underline" onClick={() => setOpen(false)}>
                     Start shopping
                   </Link>
                 </p>

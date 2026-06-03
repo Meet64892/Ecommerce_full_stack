@@ -41,10 +41,22 @@ services:
       xpack.security.enabled: "false"
       # ES_JAVA_OPTS caps heap usage so laptops and small cloud workspaces can run the stack.
       ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+      bootstrap.memory_lock: "true"
+      cluster.routing.allocation.disk.threshold_enabled: "false"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
     ports:
       - "9200:9200"
     volumes:
       - elasticsearch-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
 
   # Zookeeper coordinates Kafka brokers in this educational setup; newer Kafka can run without it, but many teams still encounter this deployment shape.
   zookeeper:

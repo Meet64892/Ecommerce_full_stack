@@ -29,11 +29,11 @@ export function Select<T extends string | number>({
 }: SelectProps<T>) {
   return (
     <div className={className}>
-      {label && <label className="mb-1 block text-sm font-medium text-gray-700">{label}</label>}
+      {label && <label className="mb-1 block text-sm font-medium text-neutral-400">{label}</label>}
       <select
         value={String(value)}
         onChange={(e) => onChange(e.target.value as T)}
-        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+        className="w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-white focus:border-white focus:outline-none focus:ring-2 focus:ring-white/20"
       >
         {options.map((opt) => (
           <option key={String(opt.value)} value={String(opt.value)}>

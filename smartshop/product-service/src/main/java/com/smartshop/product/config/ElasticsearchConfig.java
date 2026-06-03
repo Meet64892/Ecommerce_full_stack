@@ -33,8 +33,9 @@ public class ElasticsearchConfig extends ElasticsearchConfiguration {
      *
      * @param hostAndPort host:port string for the local or remote cluster
      */
-    public ElasticsearchConfig(@Value("${spring.elasticsearch.uris:http://localhost:9200}") String hostAndPort) {
-        this.hostAndPort = hostAndPort.replace("http://", "").replace("https://", "");
+    public ElasticsearchConfig(@Value("${spring.elasticsearch.uris:http://localhost:9200}") String uris) {
+        String firstUri = uris.split(",")[0].trim();
+        this.hostAndPort = firstUri.replace("http://", "").replace("https://", "");
     }
 
     /**
