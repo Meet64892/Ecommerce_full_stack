@@ -12,7 +12,9 @@ import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
 import toast from 'react-hot-toast';
 import { parseApiError } from '@utils/errorHandler';
-import { ROLE_LABELS } from '@utils/roles';
+import { Link } from 'react-router-dom';
+import { ROUTES } from '@utils/constants';
+import { ROLE_LABELS, isCustomer } from '@utils/roles';
 
 export default function ProfilePage() {
   const { user, refreshUser } = useAuth();
@@ -62,6 +64,14 @@ export default function ProfilePage() {
           Reset
         </Button>
       </form>
+      {profile && isCustomer(profile.role) && (
+        <p className="mt-6 text-center text-sm text-slate-400">
+          Want to sell on SmartShop?{' '}
+          <Link to={ROUTES.VENDOR_APPLY} className="text-primary-300 hover:underline">
+            Apply to become a vendor
+          </Link>
+        </p>
+      )}
     </motion.div>
   );
 }

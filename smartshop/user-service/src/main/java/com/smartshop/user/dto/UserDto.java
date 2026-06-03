@@ -24,5 +24,6 @@ import java.util.UUID;
  * @see com.smartshop.user.mapper.UserMapper
  * @author SmartShop Team
  */
-public record UserDto(UUID id, String email, String firstName, String lastName, String fullName, Role role, Instant createdAt) {
+public record UserDto(UUID id, String email, String firstName, String lastName, String fullName, Role role, UUID brandId,
+                      Instant createdAt) {
 }

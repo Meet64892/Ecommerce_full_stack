@@ -8,10 +8,11 @@
 
 import type { UserRole } from '@/types/product.types';
 
+/** Maps backend roles to marketplace personas from the product spec */
 export const ROLE_LABELS: Record<UserRole, string> = {
   USER: 'Customer',
-  SUPER_USER: 'Brand owner',
-  SUPER_ADMIN: 'Super admin',
+  SUPER_USER: 'Admin (Vendor)',
+  SUPER_ADMIN: 'Super Admin',
 };
 
 export function isSuperAdmin(role?: UserRole): boolean {

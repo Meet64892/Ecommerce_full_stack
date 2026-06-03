@@ -28,7 +28,7 @@ spring:
         - id: user-service
           uri: lb://user-service
           predicates:
-            - Path=/auth/**,/users/**
+            - Path=/auth/**,/users/**,/brands/**,/admin/stats,/admin/brands,/admin/brands/**,/admin/users,/admin/users/**
           filters:
             - name: CircuitBreaker
               args:
@@ -43,7 +43,7 @@ spring:
         - id: product-service
           uri: lb://product-service
           predicates:
-            - Path=/products/**,/categories/**
+            - Path=/products/**,/categories/**,/admin/products/**,/vendor/products/**
           filters:
             - name: CircuitBreaker
               args:

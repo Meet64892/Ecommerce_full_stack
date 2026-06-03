@@ -28,7 +28,10 @@ export function Header() {
     { to: ROUTES.PRODUCTS, label: 'Shop' },
     { to: ROUTES.ORDERS, label: 'Orders', protected: true },
     ...(isAuthenticated && canManageProducts(user?.role)
-      ? [{ to: ROUTES.BRAND, label: 'My products', protected: true as const }]
+      ? [
+          { to: ROUTES.VENDOR, label: 'Vendor', protected: true as const },
+          { to: ROUTES.BRAND, label: 'My products', protected: true as const },
+        ]
       : []),
     ...(isAuthenticated && isSuperAdmin(user?.role)
       ? [{ to: ROUTES.ADMIN, label: 'Admin', protected: true as const }]

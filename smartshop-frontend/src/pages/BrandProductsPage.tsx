@@ -53,7 +53,7 @@ export default function BrandProductsPage() {
   const createMutation = useMutation({
     mutationFn: productApi.create,
     onSuccess: () => {
-      toast.success('Product added to your catalog');
+      toast.success('Product submitted — pending Super Admin approval before it appears in the shop');
       reset();
       void queryClient.invalidateQueries({ queryKey: ['products'] });
     },
